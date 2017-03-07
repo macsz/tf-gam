@@ -60,16 +60,12 @@ class ClassifyFace:
                 for x in range(0, len(cells)):
                     for y in range(0, len(cells[x])):
                         cell = cells[x][y]
-                        cell = tf.reshape(cell, [1, 1, 1, 2048])
-                        # init = tf.global_variables_initializer()
-                        # sess.run(init)
-                        cell = sess.run(cell)
+                        cell = np.reshape(cell, (1, 1, 1, 2048))
 
                         a = sess.run(softmax_tensor, {'pool_3:0': cell})
 
                         res = tf.nn.softmax(a)
-                        # init = tf.global_variables_initializer()
-                        # sess.run(init)
+                        
                         res = sess.run(res)
                         probabilities = res[0]
                         top_k = probabilities.argsort()[-len(probabilities):][::-1]
