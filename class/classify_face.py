@@ -63,11 +63,11 @@ class ClassifyFace:
                         cell = np.reshape(cell, (1, 1, 1, 2048))
 
                         a = sess.run(softmax_tensor, {'pool_3:0': cell})
+                        # print(a)
+                        # res = tf.nn.softmax(a)
 
-                        res = tf.nn.softmax(a)
-                        
-                        res = sess.run(res)
-                        probabilities = res[0]
+                        # res = sess.run(res)
+                        probabilities = a[0]
                         top_k = probabilities.argsort()[-len(probabilities):][::-1]
                         for node_id in top_k:
                             human_string = self._label_lines[node_id]
@@ -107,7 +107,7 @@ class ClassifyFace:
                     prob = self._mat[str(r) + ',' + str(h)]
                     if prob > THRESHOLD_DOWN:
                         tile = patches.Rectangle((80 / 8 * h, 60 / 8 * r), 80 / 8, 60 / 8, linewidth=1, edgecolor='g',
-                                                 facecolor='g', alpha=self.get_color_intensity(prob, norm=True))
+                                                 facecolor='g', alpha=self.get_color_intensity(prob, norm=False))
                         if h < min_h:
                             min_h = h
                         if r < min_r:

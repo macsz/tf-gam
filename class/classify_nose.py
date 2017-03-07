@@ -62,10 +62,10 @@ class ClassifyNose:
                         cell = np.reshape(cell, (1,1,1,2048))
                         a = sess.run(softmax_tensor, {'pool_3:0': cell})
 
-                        res = tf.nn.softmax(a)
-
-                        res = sess.run(res)
-                        probabilities = res[0]
+                        # res = tf.nn.softmax(a)
+                        #
+                        # res = sess.run(res)
+                        probabilities = a[0]
                         top_k = probabilities.argsort()[-len(probabilities):][::-1]
                         for node_id in top_k:
                             human_string = self._label_lines[node_id]
@@ -105,11 +105,11 @@ class ClassifyNose:
                         if prob in [x[1] for x in self._sorted_probs[-3:]]:
                             tile = patches.Rectangle((lh / 8 * h, lr / 8 * r), lh / 8, lr / 8, linewidth=1,
                                                      edgecolor='b',
-                                                     facecolor='b', alpha=self.get_color_intensity(prob, norm=True))
+                                                     facecolor='b', alpha=self.get_color_intensity(prob, norm=False))
                         else:
                             tile = patches.Rectangle((lh / 8 * h, lr / 8 * r), lh / 8, lr / 8, linewidth=1,
                                                      edgecolor='g', facecolor='g',
-                                                     alpha=self.get_color_intensity(prob, norm=True))
+                                                     alpha=self.get_color_intensity(prob, norm=False))
                     else:
                         tile = patches.Rectangle((lh/8 * h, lr/8 * r), lh/8, lr/8, linewidth=1, edgecolor='r',
                                                  facecolor='none',
