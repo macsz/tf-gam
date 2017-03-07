@@ -46,13 +46,12 @@ class ClassifyNose:
 
     def _run_tf(self, sess, image_data):
         # Feed the image_data as input to the graph and get first prediction
-        init = tf.global_variables_initializer()
-        sess.run(init)
 
         softmax_tensor = sess.graph.get_tensor_by_name('final_result:0')
         feature_tensor = sess.graph.get_tensor_by_name('mixed_10/join:0')
         # feature_set: 1x 8x8x2048
         feature_set = sess.run(feature_tensor, {'DecodeJpeg/contents:0': image_data})
+
 
         for cells in feature_set:
             for x in range(0, len(cells)):
@@ -61,9 +60,6 @@ class ClassifyNose:
                     cell = np.reshape(cell, (1, 1, 1,2048))
                     a = sess.run(softmax_tensor, {'pool_3:0': cell})
 
-                    # res = tf.nn.softmax(a)
-                    #
-                    # res = sess.run(res)
                     probabilities = a[0]
                     top_k = probabilities.argsort()[-len(probabilities):][::-1]
                     for node_id in top_k:
@@ -99,7 +95,6 @@ class ClassifyNose:
                     for r in range(0, 8):
                         prob = self._mat[str(r) + ',' + str(h)]
                         if prob > THRESHOLD_DOWN:
-                            # k, v = self._sorted_probs[-3:]
 
                             if prob in [x[1] for x in self._sorted_probs[-3:]]:
                                 tile = patches.Rectangle((lh / 8 * h, lr / 8 * r), lh / 8, lr / 8, linewidth=1,

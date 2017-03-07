@@ -52,9 +52,6 @@ class ClassifyFace:
             # feature_set: 1x 8x8x2048
             feature_set = sess.run(feature_tensor, {'DecodeJpeg/contents:0': image_data})
 
-            init = tf.global_variables_initializer()
-            sess.run(init)
-
             for cells in feature_set:
                 for x in range(0, len(cells)):
                     for y in range(0, len(cells[x])):
@@ -62,10 +59,7 @@ class ClassifyFace:
                         cell = np.reshape(cell, (1, 1, 1, 2048))
 
                         a = sess.run(softmax_tensor, {'pool_3:0': cell})
-                        # print(a)
-                        # res = tf.nn.softmax(a)
 
-                        # res = sess.run(res)
                         probabilities = a[0]
                         top_k = probabilities.argsort()[-len(probabilities):][::-1]
                         for node_id in top_k:
