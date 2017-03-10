@@ -12,6 +12,9 @@ cd /home/macsz/Projects/deep_learning/desktop; JAVA_HOME=/usr/lib/jvm/java-8-ora
 popd
 python class/classify.py
 
+ffmpeg -f image2 -r 12 -i output_face/frame_%d.jpg -vcodec mpeg4 -y face-`basename $1``date '+%F-%H-%M'`.mp4
+ffmpeg -f image2 -r 12 -i output_nose/frame_%d.jpg -vcodec mpeg4 -y nose-`basename $1``date '+%F-%H-%M'`.mp4
+
 mkdir -p $DIRNAME
 mv frames $DIRNAME/
 mv output_face $DIRNAME/

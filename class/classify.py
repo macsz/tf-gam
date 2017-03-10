@@ -8,9 +8,9 @@ FRAMES_PATH = '/home/macsz/Projects/deep_learning/frames'
 if __name__ == '__main__':
     # TODO nadpisac sorted
     # co 10ty plik
-    files = sorted([join(FRAMES_PATH, f) for f in listdir(FRAMES_PATH) if isfile(join(FRAMES_PATH, f))])[0::10]
+    # files = sorted([join(FRAMES_PATH, f) for f in listdir(FRAMES_PATH) if isfile(join(FRAMES_PATH, f))])[0::10]
     # 5 pierwszych
-    # files = sorted([join(FRAMES_PATH, f) for f in listdir(FRAMES_PATH) if isfile(join(FRAMES_PATH, f))])[:5]
+    files = sorted([join(FRAMES_PATH, f) for f in listdir(FRAMES_PATH) if isfile(join(FRAMES_PATH, f))])
     # wszystkie
     # files = sorted([join(FRAMES_PATH, f) for f in listdir(FRAMES_PATH) if isfile(join(FRAMES_PATH, f))])
 

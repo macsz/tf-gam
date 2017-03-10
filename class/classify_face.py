@@ -19,7 +19,7 @@ class ClassifyFace:
     noses = {}
 
     def get_color_intensity(self, prob, norm=False):
-        max_val = 0.9
+        max_val = 0.3
         min_val = 0.1
         if not norm:
             val = max_val * prob
@@ -71,6 +71,7 @@ class ClassifyFace:
     def run(self):
         self._load_tf()
         counter = 0
+        failed_counter = 0
         with tf.Session() as sess:
 
             for image_path in self._files:
@@ -118,9 +119,7 @@ class ClassifyFace:
                 detected_face = patches.Rectangle((80 / 8 * min_h, 60 / 8 * min_r), 80 / 8 * (max_h-min_h+1),
                                                   60 / 8 * (max_r-min_r+1), linewidth=3, edgecolor='g', facecolor='none')
                 ax.add_patch(detected_face)
-
                 img_face = img_full[min_r*int(60 / 8):(max_r+1)*int(60 / 8), min_h*int(80 / 8):(max_h+1)*int(80 / 8)]
-
                 # plt.show()
                 save_path = image_path.split('/')
                 save_path[-2] = 'output_face'
@@ -130,10 +129,15 @@ class ClassifyFace:
                 nose_path = image_path.split('/')
                 nose_path[-2] = 'input_nose'
                 nose_path = '/'.join(nose_path)
-                scipy.misc.imsave(nose_path, img_face)
+                try:
+                    scipy.misc.imsave(nose_path, img_face)
+                except ValueError as ve:
+                    print('FAILED', image_path)
+                    failed_counter += 1
 
                 nose_data = {
                     'orig_path': image_path,
+                    'save_path': save_path,
                     'nose_path': nose_path,
                     'nose_position': {
                         'min_h': min_h,
@@ -147,6 +151,7 @@ class ClassifyFace:
                 plt.clf()
                 plt.cla()
                 plt.close('all')
+        print('Total failed:', failed_counter)
 
     def __init__(self, files, model_path):
         self._model_path = model_path

@@ -5,7 +5,7 @@ from PIL import Image
 import numpy as np
 import operator
 from timeit import default_timer as timer
-
+from tools import get_color_intensity
 
 THRESHOLD_DOWN = 0.72
 THRESHOLD_UP = 0.75
@@ -17,15 +17,6 @@ class ClassifyNose:
     _model_path = ''
     _label_lines = None
     _sorted_probs = None
-
-    def get_color_intensity(self, prob, norm=False):
-        max_val = 0.9
-        min_val = 0.1
-        if not norm:
-            val = max_val * prob
-        else:
-            val = ((max_val-min_val)*(prob-THRESHOLD_DOWN))/(THRESHOLD_UP-THRESHOLD_DOWN)+min_val
-        return val
 
     def get_weights(self, shape, ):
         tf.get_variable('weights', shape, initializer=tf.zeros_initializer)
@@ -52,12 +43,11 @@ class ClassifyNose:
         # feature_set: 1x 8x8x2048
         feature_set = sess.run(feature_tensor, {'DecodeJpeg/contents:0': image_data})
 
-
         for cells in feature_set:
             for x in range(0, len(cells)):
                 for y in range(0, len(cells[x])):
                     cell = cells[x][y]
-                    cell = np.reshape(cell, (1, 1, 1,2048))
+                    cell = np.reshape(cell, (1, 1, 1, 2048))
                     a = sess.run(softmax_tensor, {'pool_3:0': cell})
 
                     probabilities = a[0]
@@ -75,15 +65,19 @@ class ClassifyNose:
         with tf.Session() as sess:
             for image_path in self._noses.keys():
                 counter += 1
-                image_data = tf.gfile.FastGFile(self._noses[image_path]['nose_path'], 'rb').read()
+                try:
+                    image_data = tf.gfile.FastGFile(self._noses[image_path]['nose_path'], 'rb').read()
+                except:
+                    continue
 
                 time_start = timer()
                 self._run_tf(sess, image_data)
                 time_elapsed = timer() - time_start
                 print('{0}/{1}'.format(counter, len(self._noses)), 'Nose TF elapsed time', image_path, time_elapsed)
 
-                img_full = np.array(Image.open(self._noses[image_path]['nose_path']), dtype=np.uint8)
-                lh, lr = len(img_full), len(img_full[0])
+                img_full_for_nose = np.array(Image.open(self._noses[image_path]['nose_path']), dtype=np.uint8)
+                img_full = np.array(Image.open(self._noses[image_path]['orig_path']), dtype=np.uint8)
+                lh, lr = len(img_full_for_nose[0]), len(img_full_for_nose)
 
                 # Create figure and axes
                 fig, ax = plt.subplots(1)
@@ -96,19 +90,32 @@ class ClassifyNose:
                         prob = self._mat[str(r) + ',' + str(h)]
                         if prob > THRESHOLD_DOWN:
 
-                            if prob in [x[1] for x in self._sorted_probs[-3:]]:
-                                tile = patches.Rectangle((lh / 8 * h, lr / 8 * r), lh / 8, lr / 8, linewidth=1,
-                                                         edgecolor='b',
-                                                         facecolor='b', alpha=self.get_color_intensity(prob, norm=False))
-                            else:
-                                tile = patches.Rectangle((lh / 8 * h, lr / 8 * r), lh / 8, lr / 8, linewidth=1,
-                                                         edgecolor='g', facecolor='g',
-                                                         alpha=self.get_color_intensity(prob, norm=False))
-                        else:
-                            tile = patches.Rectangle((lh/8 * h, lr/8 * r), lh/8, lr/8, linewidth=1, edgecolor='r',
-                                                     facecolor='none',
-                                                     alpha=0.5)
-                        ax.add_patch(tile)
+                            if prob in [x[1] for x in self._sorted_probs[-2:]]:
+                                tile = patches.Rectangle(
+                                    (lh / 8 * h + self._noses[image_path]['nose_position']['min_h'] * 80 / 8 ,
+                                     lr / 8 * r + self._noses[image_path]['nose_position']['min_r'] * 60 / 8),
+                                    lh / 8, lr / 8, linewidth=1,
+                                    edgecolor='b',
+                                    facecolor='b',
+                                    alpha=get_color_intensity(prob, norm=False,
+                                                              threshold_up=THRESHOLD_UP,
+                                                              threshold_down=THRESHOLD_DOWN))
+                                ax.add_patch(tile)
+                            # else:
+                            #     tile = patches.Rectangle(
+                            #         (lh / 8 * h + self._noses[image_path]['nose_position']['min_h'] * 80 /8,
+                            #          lr / 8 * r + self._noses[image_path]['nose_position']['min_r'] * 60/8),
+                            #         lh / 8, lr / 8, linewidth=1,
+                            #         edgecolor='g', facecolor='g',
+                            #         alpha=get_color_intensity(prob, norm=False))
+                       # else:
+                tile = patches.Rectangle(
+                    (self._noses[image_path]['nose_position']['min_h'] * 80 / 8,
+                     self._noses[image_path]['nose_position']['min_r'] * 60 / 8),
+                    lh, lr, linewidth=1, edgecolor='g',
+                    facecolor='none',
+                    alpha=0.5)
+                ax.add_patch(tile)
 
                 # img_face = img_full[min_r*int(60 / 8):(max_r+1)*int(60 / 8), min_h*int(80 / 8):(max_h+1)*int(80 / 8)]
 
