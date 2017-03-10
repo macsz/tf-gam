@@ -94,3 +94,6 @@ venv-gpu/
 # IDE
 .idea/
 
+# outputs
+*.mp4
+out/
