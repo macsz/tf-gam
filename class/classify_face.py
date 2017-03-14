@@ -5,6 +5,7 @@ from PIL import Image
 import scipy.misc
 import numpy as np
 from timeit import default_timer as timer
+from tools import get_color_intensity
 
 
 THRESHOLD_DOWN = 0.5
@@ -17,15 +18,6 @@ class ClassifyFace:
     _model_path = ''
     _label_lines = None
     noses = {}
-
-    def get_color_intensity(self, prob, norm=False):
-        max_val = 0.3
-        min_val = 0.1
-        if not norm:
-            val = max_val * prob
-        else:
-            val = ((max_val-min_val)*(prob-THRESHOLD_DOWN))/(THRESHOLD_UP-THRESHOLD_DOWN)+min_val
-        return val
 
     def get_weights(self, shape, ):
         tf.get_variable('weights', shape, initializer=tf.zeros_initializer)
@@ -102,7 +94,7 @@ class ClassifyFace:
                         prob = self._mat[str(r) + ',' + str(h)]
                         if prob > THRESHOLD_DOWN:
                             tile = patches.Rectangle((80 / 8 * h, 60 / 8 * r), 80 / 8, 60 / 8, linewidth=1, edgecolor='g',
-                                                     facecolor='g', alpha=self.get_color_intensity(prob, norm=False))
+                                                     facecolor='g', alpha=get_color_intensity(prob, norm=False))
                             if h < min_h:
                                 min_h = h
                             if r < min_r:
@@ -112,8 +104,8 @@ class ClassifyFace:
                             if r > max_r:
                                 max_r = r
                         else:
-                            tile = patches.Rectangle((80/8 * h, 60/8 * r), 80/8, 60/8, linewidth=1, edgecolor='r', facecolor='none',
-                                                     alpha=0.5)
+                            tile = patches.Rectangle((80/8 * h, 60/8 * r), 80/8, 60/8, linewidth=1, edgecolor='r',
+                                                     facecolor='none', alpha=0.5)
                         ax.add_patch(tile)
 
                 detected_face = patches.Rectangle((80 / 8 * min_h, 60 / 8 * min_r), 80 / 8 * (max_h-min_h+1),
