@@ -93,7 +93,21 @@ venv-gpu/
 
 # IDE
 .idea/
+nbactions.xml
 
 # outputs
 *.mp4
 out/
+
+# OSX
+.DS_Store
+._.DS_Store
+
+# java jar
+*.jar
+
+# others
+.directory
+
+# git swp
+*.swp
