@@ -23,8 +23,8 @@ popd
 
 time python class/classify.py
 
-ffmpeg -f image2 -r 12 -i output_face/frame_%5d.jpg -vcodec mpeg4 -y face-`basename $1``date '+%F-%H-%M'`.mp4
-ffmpeg -f image2 -r 12 -i output_nose/frame_%5d.jpg -vcodec mpeg4 -y nose-`basename $1``date '+%F-%H-%M'`.mp4
+ffmpeg -f image2 -r 12 -i output_face/frame_%5d.jpg -vcodec mpeg4 -y face-`basename $1``date '+%F-%H-%M'`.mp4 2> /dev/null
+ffmpeg -f image2 -r 12 -i output_nose/frame_%5d.jpg -vcodec mpeg4 -y nose-`basename $1``date '+%F-%H-%M'`.mp4 2> /dev/null
 
 mkdir -p $DIRNAME
 mv frames $DIRNAME/
@@ -35,3 +35,6 @@ mv *.mp4 $DIRNAME/
 
 echo Finished: `date`
 echo $DIRNAME
+
+# TODO add other file managers; for OSX etc...
+dolphin $DIRNAME &

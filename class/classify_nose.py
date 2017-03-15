@@ -87,7 +87,7 @@ class ClassifyNose:
                 # Display the image
                 ax.imshow(img_full)
 
-                cache_frame = [
+                frame_cache = [
                     [0, 0, 0, 0, 0, 0, 0, 0],
                     [0, 0, 0, 0, 0, 0, 0, 0],
                     [0, 0, 0, 0, 0, 0, 0, 0],
@@ -101,38 +101,44 @@ class ClassifyNose:
                 for h in range(0, 8):
                     for r in range(0, 8):
                         prob = self._mat[str(r) + ',' + str(h)]
-                        if prob > THRESHOLD_DOWN:
+                        if prob > THRESHOLD_DOWN and prob in [x[1] for x in self._sorted_probs[-2:]]:
+                            frame_cache[h][r] = 1
 
-                            if prob in [x[1] for x in self._sorted_probs[-2:]]:
-                                tile = patches.Rectangle(
-                                    (lh / 8 * h + self._noses[image_path]['nose_position']['min_h'] * 80 / 8,
-                                     lr / 8 * r + self._noses[image_path]['nose_position']['min_r'] * 60 / 8),
-                                    lh / 8, lr / 8, linewidth=1,
-                                    edgecolor='b',
-                                    facecolor='b',
-                                    alpha=get_color_intensity(prob, norm=False,
-                                                              threshold_up=THRESHOLD_UP,
-                                                              threshold_down=THRESHOLD_DOWN))
-                                ax.add_patch(tile)
-                                cache_frame[h][r] += 1
+                cache.append(frame_cache)
 
-                            if get_cached_prob(cache=cache, h=h, r=r):
-                                tile = patches.Rectangle(
-                                    (lh / 8 * h + self._noses[image_path]['nose_position']['min_h'] * 80 / 8,
-                                     lr / 8 * r + self._noses[image_path]['nose_position']['min_r'] * 60 / 8),
-                                    lh / 8, lr / 8, linewidth=1,
-                                    edgecolor='r',
-                                    facecolor='r',
-                                    alpha=get_color_intensity(prob, norm=False,
-                                                              threshold_up=THRESHOLD_UP,
-                                                              threshold_down=THRESHOLD_DOWN))
-                                ax.add_patch(tile)
-                cache.append(cache_frame)
+                for h in range(0, 8):
+                    for r in range(0, 8):
+                        prob = self._mat[str(r) + ',' + str(h)]
+                        # if prob > THRESHOLD_DOWN:
+                        cached_prob, activity = get_cached_prob(cache=cache, h=h, r=r, active_frames=10,
+                                                                threshold=4)
+                        if cached_prob and activity > 0:
+                            tile = patches.Rectangle(
+                                (lh / 8 * h + self._noses[image_path]['nose_position']['min_h'] * 80 / 8,
+                                 lr / 8 * r + self._noses[image_path]['nose_position']['min_r'] * 60 / 8),
+                                lh / 8, lr / 8, linewidth=1,
+                                edgecolor='b',
+                                facecolor='b',
+                                alpha=get_color_intensity(prob, norm=False,
+                                                          threshold_up=THRESHOLD_UP,
+                                                          threshold_down=THRESHOLD_DOWN))
+                            ax.add_patch(tile)
+                            text_h = lh / 8 * h + self._noses[image_path]['nose_position']['min_h'] * 80 / 8 + lh/16
+                            text_r = lr / 8 * r + self._noses[image_path]['nose_position']['min_r'] * 60 / 8 + lr/16
+                            ax.annotate(str(activity),
+                                xytext=(
+                                    text_h,
+                                    text_r
+                                ),
+                                xy=(
+                                    text_h,
+                                    text_r
+                                ))
 
                 tile = patches.Rectangle(
                     (self._noses[image_path]['nose_position']['min_h'] * 80 / 8,
                      self._noses[image_path]['nose_position']['min_r'] * 60 / 8),
-                    lh, lr, linewidth=1, edgecolor='g',
+                    lh, lr, linewidth=3, edgecolor='g',
                     facecolor='none',
                     alpha=0.5)
                 ax.add_patch(tile)

@@ -118,7 +118,8 @@ class ClassifyFace:
                     for r in range(0, 8):
                         prob = self._mat[str(r) + ',' + str(h)]
                         if prob > THRESHOLD_DOWN:
-                            if get_cached_prob(cache=cache, h=h, r=r):
+                            cached_prob, activity = get_cached_prob(cache=cache, h=h, r=r)
+                            if cached_prob:
                                 frame_mask[h][r] = 1
                 max_h = -1
                 max_r = -1
@@ -147,7 +148,6 @@ class ClassifyFace:
                                                   60 / 8 * (max_r-min_r+1), linewidth=3, edgecolor='g', facecolor='none')
                 ax.add_patch(detected_face)
                 img_face = img_full[min_r*int(60 / 8):(max_r+1)*int(60 / 8), min_h*int(80 / 8):(max_h+1)*int(80 / 8)]
-                # plt.show()
                 save_path = image_path.split('/')
                 save_path[-2] = 'output_face'
                 save_path = '/'.join(save_path)
