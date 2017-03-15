@@ -87,7 +87,6 @@ class ClassifyNose:
                 # Display the image
                 ax.imshow(img_full)
 
-                cache_frame = [[0]*8]*8
                 cache_frame = [
                     [0, 0, 0, 0, 0, 0, 0, 0],
                     [0, 0, 0, 0, 0, 0, 0, 0],
@@ -117,7 +116,7 @@ class ClassifyNose:
                                 ax.add_patch(tile)
                                 cache_frame[h][r] += 1
 
-                            if get_cached_prob(cache=cache, frame=counter-1, h=h, r=r):
+                            if get_cached_prob(cache=cache, h=h, r=r):
                                 tile = patches.Rectangle(
                                     (lh / 8 * h + self._noses[image_path]['nose_position']['min_h'] * 80 / 8,
                                      lr / 8 * r + self._noses[image_path]['nose_position']['min_r'] * 60 / 8),
@@ -129,13 +128,7 @@ class ClassifyNose:
                                                               threshold_down=THRESHOLD_DOWN))
                                 ax.add_patch(tile)
                 cache.append(cache_frame)
-                            # else:
-                            #     tile = patches.Rectangle(
-                            #         (lh / 8 * h + self._noses[image_path]['nose_position']['min_h'] * 80 /8,
-                            #          lr / 8 * r + self._noses[image_path]['nose_position']['min_r'] * 60/8),
-                            #         lh / 8, lr / 8, linewidth=1,
-                            #         edgecolor='g', facecolor='g',
-                            #         alpha=get_color_intensity(prob, norm=False))
+
                 tile = patches.Rectangle(
                     (self._noses[image_path]['nose_position']['min_h'] * 80 / 8,
                      self._noses[image_path]['nose_position']['min_r'] * 60 / 8),
@@ -144,9 +137,6 @@ class ClassifyNose:
                     alpha=0.5)
                 ax.add_patch(tile)
 
-                # img_face = img_full[min_r*int(60 / 8):(max_r+1)*int(60 / 8), min_h*int(80 / 8):(max_h+1)*int(80 / 8)]
-
-                # plt.show()
                 save_path = image_path.split('/')
                 save_path[-2] = 'output_nose'
                 save_path = '/'.join(save_path)

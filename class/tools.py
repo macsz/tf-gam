@@ -8,24 +8,36 @@ def get_color_intensity(prob, norm=False, threshold_down=0.5, threshold_up=0.8):
     return val
 
 
-def get_cached_prob(cache, frame, h, r):
+def get_cached_prob(cache, h, r):
     """
 
     :param cache: list of image caches
-    :param frame: frame id
     :param h:
     :param r:
     :return:
     """
     if not cache:
-        return
+        return True
     active_frames = 7
     threshold = 3
     activity = 0
-    start_frame = frame - active_frames
+    last_frame = len(cache)
+    start_frame = last_frame - active_frames
     if start_frame < 0:
-        start_frame = 0
-    for i in range(start_frame, frame):
-        if cache[i][h][r]:
-            activity += 1
+        return True
+        # start_frame = 0
+    for i in range(start_frame, last_frame):
+        try:
+            if cache[i][h][r]:
+                activity += 1
+        except IndexError as ie:
+            raise IndexError('Failed to get index:', i, h, r)
+
     return activity >= threshold
+
+
+def get_column_power(mat, c):
+    power = 0
+    for row in range(0, 8):
+        power += mat[c][row]
+    return power

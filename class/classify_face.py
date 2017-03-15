@@ -5,8 +5,7 @@ from PIL import Image
 import scipy.misc
 import numpy as np
 from timeit import default_timer as timer
-from tools import get_color_intensity
-
+from tools import get_color_intensity, get_cached_prob, get_column_power
 
 THRESHOLD_DOWN = 0.5
 THRESHOLD_UP = 0.8
@@ -63,10 +62,11 @@ class ClassifyFace:
     def run(self):
         self._load_tf()
         counter = 0
+        cache = []
         failed_counter = 0
         with tf.Session() as sess:
 
-            for image_path in self._files:
+            for image_path in sorted(self._files):
                 counter += 1
 
                 # Read in the image_data
@@ -85,29 +85,59 @@ class ClassifyFace:
                 # Display the image
                 ax.imshow(img_full)
 
-                max_h = -1
-                max_r = -1
-                min_h = 999
-                min_r = 999
+                frame_cache = [
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                ]
+                frame_mask = [
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0],
+                ]
+
                 for h in range(0, 8):
                     for r in range(0, 8):
                         prob = self._mat[str(r) + ',' + str(h)]
                         if prob > THRESHOLD_DOWN:
-                            tile = patches.Rectangle((80 / 8 * h, 60 / 8 * r), 80 / 8, 60 / 8, linewidth=1, edgecolor='g',
-                                                     facecolor='g', alpha=get_color_intensity(prob, norm=False))
-                            if h < min_h:
-                                min_h = h
-                            if r < min_r:
-                                min_r = r
-                            if h > max_h:
-                                max_h = h
-                            if r > max_r:
-                                max_r = r
-                        else:
-                            tile = patches.Rectangle((80/8 * h, 60/8 * r), 80/8, 60/8, linewidth=1, edgecolor='r',
-                                                     facecolor='none', alpha=0.5)
-                        ax.add_patch(tile)
+                            frame_cache[h][r] += 1
+                            if get_cached_prob(cache=cache, h=h, r=r):
+                                frame_mask[h][r] = 1
 
+                cache.append(frame_cache)
+
+                max_h = -1
+                max_r = -1
+                min_h = 999
+                min_r = 999
+
+                for h in range(0, 8):
+                    if get_column_power(frame_mask, h) > 1:
+                        for r in range(0, 8):
+                            prob = self._mat[str(r) + ',' + str(h)]
+                            if prob > THRESHOLD_DOWN:
+                                if h < min_h:
+                                    min_h = h
+                                if r < min_r:
+                                    min_r = r
+                                if h > max_h:
+                                    max_h = h
+                                if r > max_r:
+                                    max_r = r
+                                tile = patches.Rectangle((80 / 8 * h, 60 / 8 * r), 80 / 8, 60 / 8, linewidth=1,
+                                                         edgecolor='g', facecolor='g',
+                                                         alpha=get_color_intensity(prob, norm=False))
+                                ax.add_patch(tile)
                 detected_face = patches.Rectangle((80 / 8 * min_h, 60 / 8 * min_r), 80 / 8 * (max_h-min_h+1),
                                                   60 / 8 * (max_r-min_r+1), linewidth=3, edgecolor='g', facecolor='none')
                 ax.add_patch(detected_face)
