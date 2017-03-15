@@ -111,11 +111,15 @@ class ClassifyFace:
                         prob = self._mat[str(r) + ',' + str(h)]
                         if prob > THRESHOLD_DOWN:
                             frame_cache[h][r] += 1
-                            if get_cached_prob(cache=cache, h=h, r=r):
-                                frame_mask[h][r] = 1
 
                 cache.append(frame_cache)
 
+                for h in range(0, 8):
+                    for r in range(0, 8):
+                        prob = self._mat[str(r) + ',' + str(h)]
+                        if prob > THRESHOLD_DOWN:
+                            if get_cached_prob(cache=cache, h=h, r=r):
+                                frame_mask[h][r] = 1
                 max_h = -1
                 max_r = -1
                 min_h = 999
@@ -138,6 +142,7 @@ class ClassifyFace:
                                                          edgecolor='g', facecolor='g',
                                                          alpha=get_color_intensity(prob, norm=False))
                                 ax.add_patch(tile)
+
                 detected_face = patches.Rectangle((80 / 8 * min_h, 60 / 8 * min_r), 80 / 8 * (max_h-min_h+1),
                                                   60 / 8 * (max_r-min_r+1), linewidth=3, edgecolor='g', facecolor='none')
                 ax.add_patch(detected_face)
