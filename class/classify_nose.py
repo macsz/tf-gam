@@ -106,6 +106,11 @@ class ClassifyNose:
 
                 cache.append(frame_cache)
 
+                max_h = -1
+                max_r = -1
+                min_h = 999
+                min_r = 999
+
                 for h in range(0, 8):
                     for r in range(0, 8):
                         prob = self._mat[str(r) + ',' + str(h)]
@@ -113,6 +118,14 @@ class ClassifyNose:
                         cached_prob, activity = get_cached_prob(cache=cache, h=h, r=r, active_frames=10,
                                                                 threshold=4)
                         if cached_prob and activity > 0:
+                            if lh / 8 * h + self._noses[image_path]['nose_position']['min_h'] * 80 / 8 < min_h:
+                                min_h = lh / 8 * h + self._noses[image_path]['nose_position']['min_h'] * 80 / 8
+                            if lr / 8 * r + self._noses[image_path]['nose_position']['min_r'] * 60 / 8 < min_r:
+                                min_r = lr / 8 * r + self._noses[image_path]['nose_position']['min_r'] * 60 / 8
+                            if lh / 8 * h + self._noses[image_path]['nose_position']['min_h'] * 80 / 8 + lh / 8 > max_h:
+                                max_h = lh / 8 * h + self._noses[image_path]['nose_position']['min_h'] * 80 / 8 + lh / 8
+                            if lr / 8 * r + self._noses[image_path]['nose_position']['min_r'] * 60 / 8 + lr / 8 > max_r:
+                                max_r = lr / 8 * r + self._noses[image_path]['nose_position']['min_r'] * 60 / 8 + lr / 8
                             tile = patches.Rectangle(
                                 (lh / 8 * h + self._noses[image_path]['nose_position']['min_h'] * 80 / 8,
                                  lr / 8 * r + self._noses[image_path]['nose_position']['min_r'] * 60 / 8),
@@ -123,17 +136,17 @@ class ClassifyNose:
                                                           threshold_up=THRESHOLD_UP,
                                                           threshold_down=THRESHOLD_DOWN))
                             ax.add_patch(tile)
-                            text_h = lh / 8 * h + self._noses[image_path]['nose_position']['min_h'] * 80 / 8 + lh/16
-                            text_r = lr / 8 * r + self._noses[image_path]['nose_position']['min_r'] * 60 / 8 + lr/16
-                            ax.annotate(str(activity),
-                                xytext=(
-                                    text_h,
-                                    text_r
-                                ),
-                                xy=(
-                                    text_h,
-                                    text_r
-                                ))
+                            # text_h = lh / 8 * h + self._noses[image_path]['nose_position']['min_h'] * 80 / 8 + lh/16
+                            # text_r = lr / 8 * r + self._noses[image_path]['nose_position']['min_r'] * 60 / 8 + lr/16
+                            # ax.annotate(str(activity),
+                            #     xytext=(
+                            #         text_h,
+                            #         text_r
+                            #     ),
+                            #     xy=(
+                            #         text_h,
+                            #         text_r
+                            #     ))
 
                 tile = patches.Rectangle(
                     (self._noses[image_path]['nose_position']['min_h'] * 80 / 8,
@@ -142,6 +155,10 @@ class ClassifyNose:
                     facecolor='none',
                     alpha=0.5)
                 ax.add_patch(tile)
+
+                detected_nose = patches.Rectangle((min_h, min_r), (max_h - min_h), (max_r - min_r), linewidth=2,
+                                                  edgecolor='b', facecolor='none', alpha=0.5)
+                ax.add_patch(detected_nose)
 
                 save_path = image_path.split('/')
                 save_path[-2] = 'output_nose'

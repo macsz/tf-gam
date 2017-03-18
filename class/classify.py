@@ -9,7 +9,7 @@ if __name__ == '__main__':
     # co 10ty plik
     # files = sorted([join(FRAMES_PATH, f) for f in listdir(FRAMES_PATH) if isfile(join(FRAMES_PATH, f))])[0::10]
     # 5 pierwszych
-    files = sorted([join(FRAMES_PATH, f) for f in listdir(FRAMES_PATH) if isfile(join(FRAMES_PATH, f))])[:50]
+    files = sorted([join(FRAMES_PATH, f) for f in listdir(FRAMES_PATH) if isfile(join(FRAMES_PATH, f))])[:40]
     # wszystkie
     # files = sorted([join(FRAMES_PATH, f) for f in listdir(FRAMES_PATH) if isfile(join(FRAMES_PATH, f))])
 
