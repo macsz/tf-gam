@@ -1,3 +1,6 @@
+import numpy as np
+
+
 def get_color_intensity(prob, norm=False, threshold_down=0.5, threshold_up=0.8):
     max_val = 0.4
     min_val = 0.1
@@ -38,3 +41,11 @@ def get_column_power(mat, c):
     for row in range(0, 8):
         power += 1 if mat[c][row] else 0
     return power
+
+
+def get_avg_color(img):
+    return np.average(img)
+
+
+def array_slice(arr, x, y, w, h):
+    return arr[y:y+h, x:x+w]

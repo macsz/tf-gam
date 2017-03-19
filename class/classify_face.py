@@ -5,7 +5,7 @@ from PIL import Image
 import scipy.misc
 import numpy as np
 from timeit import default_timer as timer
-from tools import get_color_intensity, get_cached_prob, get_column_power
+from tools import get_color_intensity, get_cached_prob, get_column_power, get_avg_color, array_slice
 
 THRESHOLD_DOWN = 0.5
 THRESHOLD_UP = 0.8
@@ -125,6 +125,7 @@ class ClassifyFace:
                 max_r = -1
                 min_h = 999
                 min_r = 999
+                cells_avg_color = []
 
                 for h in range(0, 8):
                     if get_column_power(frame_mask, h) > 1:
@@ -142,7 +143,12 @@ class ClassifyFace:
                                 tile = patches.Rectangle((80 / 8 * h, 60 / 8 * r), 80 / 8, 60 / 8, linewidth=1,
                                                          edgecolor='g', facecolor='g',
                                                          alpha=get_color_intensity(prob, norm=False))
+                                cells_avg_color.append(get_avg_color(array_slice(img_full, x=int(80 / 8 * h),
+                                                                                 y=int(60 / 8 * r), w=int(80 / 8),
+                                                                                 h=int(60 / 8))))
                                 ax.add_patch(tile)
+                frame_active_avg = np.average(cells_avg_color)
+                print('Avg color of frames active cells:', frame_active_avg)
 
                 detected_face = patches.Rectangle((80 / 8 * min_h, 60 / 8 * min_r), 80 / 8 * (max_h-min_h+1),
                                                   60 / 8 * (max_r-min_r+1), linewidth=3, edgecolor='g', facecolor='none')
