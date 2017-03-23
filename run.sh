@@ -37,6 +37,7 @@ mv output_nose $DIRNAME/
 mv input_nose $DIRNAME/
 mv *.mp4 $DIRNAME/
 mv time.txt $DIRNAME/
+mv grid.jpg $DIRNAME/
 
 echo Finished: `date`
 echo $DIRNAME

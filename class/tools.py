@@ -1,3 +1,6 @@
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+from PIL import Image
 import numpy as np
 
 
@@ -49,3 +52,29 @@ def get_avg_color(img):
 
 def array_slice(arr, x, y, w, h):
     return arr[y:y+h, x:x+w]
+
+
+def draw_grid(img, save_path='playground/saved.jpg', open_path='playground/image.jpg'):
+    plt.close('all')
+    if not img:
+        img = np.array(Image.open(open_path), dtype=np.uint8)
+    fig, ax = plt.subplots()
+    xp = float(80 / 8)
+    yp = float(60 / 8)
+    for x in range(8):
+        for y in range(8):
+            tile = patches.Rectangle((xp * x, yp * y), xp, yp, linewidth=1,
+                                     edgecolor='g', facecolor='none')
+            text_x = xp * x + xp / 3
+            text_y = yp * y + yp / 2
+            ax.annotate(
+                '{0}:{1}'.format(x, y),
+                xytext=(text_x, text_y),
+                xy=(text_x, text_y), color='red'
+            )
+            ax.add_patch(tile)
+
+    ax.imshow(img)
+    plt.axis("off")
+    # plt.show()
+    plt.savefig(save_path)
