@@ -1,19 +1,10 @@
 package pg.eti.biomed.leptonreader;
 
 import java.awt.Dimension;
-import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
-import java.util.concurrent.TimeUnit;
-
-import com.xuggle.mediatool.IMediaWriter;
-import com.xuggle.mediatool.ToolFactory;
-import com.xuggle.xuggler.ICodec;
-import java.awt.Point;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
