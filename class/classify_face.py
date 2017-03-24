@@ -64,6 +64,7 @@ class ClassifyFace:
         counter = 0
         cache = []
         failed_counter = 0
+        all_frames_cells_avg_color_sum = 0
         with tf.Session() as sess:
 
             for image_path in sorted(self._files):
@@ -148,7 +149,8 @@ class ClassifyFace:
                                                                                  h=int(60 / 8))))
                                 ax.add_patch(tile)
                 frame_active_avg = np.average(cells_avg_color)
-                print('Avg color of frames active cells:', frame_active_avg)
+                print('Frame\'s average color for active cells:', frame_active_avg)
+                all_frames_cells_avg_color_sum += frame_active_avg
 
                 detected_face = patches.Rectangle((80 / 8 * min_h, 60 / 8 * min_r), 80 / 8 * (max_h-min_h+1),
                                                   60 / 8 * (max_r-min_r+1), linewidth=3, edgecolor='g', facecolor='none')
@@ -184,6 +186,7 @@ class ClassifyFace:
                 plt.clf()
                 plt.cla()
                 plt.close('all')
+        print('Movie\'s average color for active cells:', (all_frames_cells_avg_color_sum/len(self._files)))
         print('Total failed:', failed_counter)
 
     def __init__(self, files, model_path):
