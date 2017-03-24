@@ -10,7 +10,8 @@ then
     PROC=$2
 fi
 
-DIRNAME=../dl_out/`basename $1`/`date '+%F-%H-%M'`
+BASE_NAME=`basename $1 | cut -d'.' -f1`
+DIRNAME=../dl_out/$BASE_NAME/`date '+%F-%H-%M'`
 
 mkdir -p frames
 mkdir -p output_face
@@ -37,10 +38,10 @@ mv output_nose $DIRNAME/
 mv input_nose $DIRNAME/
 mv *.mp4 $DIRNAME/
 mv time.txt $DIRNAME/
-mv grid.jpg $DIRNAME/
+
+mv grid.jpg $DIRNAME/$BASE_NAME.jpg
 
 echo Finished: `date`
-echo $DIRNAME
 
 # TODO add other file managers; for OSX etc...
 #dolphin $DIRNAME &
