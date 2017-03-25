@@ -4,7 +4,7 @@ from classify_nose import ClassifyNose
 from os import listdir
 from os.path import isfile, join
 
-FRAMES_PATH = '/home/macsz/Projects/deep_learning/frames'
+FRAMES_PATH = '/home/macsz/Projects/tf-gam/frames'
 
 if __name__ == '__main__':
     # co 10ty plik
@@ -16,10 +16,10 @@ if __name__ == '__main__':
 
     tools.draw_grid(img=None, open_path=files[0], save_path='/home/macsz/Projects/deep_learning/grid.jpg')
 
-    face_classifier = ClassifyFace(files=files, model_path='/home/macsz/Projects/dl_in/face_training/')
+    face_classifier = ClassifyFace(files=files)
     face_classifier.run()
 
     noses = face_classifier.noses
 
-    nose_classifier = ClassifyNose(noses=noses, model_path='/home/macsz/Projects/dl_in/nose_training/')
+    nose_classifier = ClassifyNose(noses=noses)
     nose_classifier.run()

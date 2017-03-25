@@ -27,10 +27,14 @@ class ClassifyNose:
 
     def _load_tf(self):
         # Loads label file, strips off carriage return
-        self._label_lines = [line.rstrip() for line in tf.gfile.GFile(self._model_path + "retrained_labels.txt")]
+        self._label_lines = [line.rstrip() for line in tf.gfile.GFile(
+            "class/models/nose_retrained_labels.txt")]
 
         # Unpersists graph from file
-        with tf.gfile.FastGFile(self._model_path + "retrained_graph.pb", 'rb') as f:
+        with tf.gfile.FastGFile(
+                        "class/models/nose_retrained_graph.pb",
+                        'rb'
+        ) as f:
             graph_def = tf.GraphDef()
             graph_def.ParseFromString(f.read())
             _ = tf.import_graph_def(graph_def, name='')
@@ -168,6 +172,5 @@ class ClassifyNose:
                 plt.cla()
                 plt.close('all')
 
-    def __init__(self, noses, model_path):
-        self._model_path = model_path
+    def __init__(self, noses):
         self._noses = noses

@@ -86,7 +86,7 @@ public class ManualVideoCompile implements EventListener {
             number++;
             String n = String.format("%1$05d", number);
             saveBuffImgToFile((BufferedImage) parameter,
-                    "/home/macsz/Projects/deep_learning/frames/frame_"+n);
+                    "/home/macsz/Projects/tf-gam/frames/frame_"+n);
             images.add((BufferedImage) parameter);
             name = (String) parameter2;
         } else if (event == Event.FINISHED_READING) {

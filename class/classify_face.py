@@ -27,10 +27,14 @@ class ClassifyFace:
 
     def _load_tf(self):
         # Loads label file, strips off carriage return
-        self._label_lines = [line.rstrip() for line in tf.gfile.GFile(self._model_path + "retrained_labels.txt")]
+        self._label_lines = [line.rstrip() for line in tf.gfile.GFile(
+            "class/models/face_retrained_labels.txt")]
 
         # Unpersists graph from file
-        with tf.gfile.FastGFile(self._model_path + "retrained_graph.pb", 'rb') as f:
+        with tf.gfile.FastGFile(
+                        "class/models/face_retrained_graph.pb",
+                        'rb'
+        ) as f:
             graph_def = tf.GraphDef()
             graph_def.ParseFromString(f.read())
             _ = tf.import_graph_def(graph_def, name='')
@@ -189,6 +193,5 @@ class ClassifyFace:
         print('Movie\'s average color for active cells:', (all_frames_cells_avg_color_sum/len(self._files)))
         print('Total failed:', failed_counter)
 
-    def __init__(self, files, model_path):
-        self._model_path = model_path
+    def __init__(self, files):
         self._files = files

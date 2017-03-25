@@ -18,7 +18,7 @@ public class FileReader {
             path = args[0];
         }
         catch(Exception ex){
-            path = "/home/macsz/Projects/deep_learning/desktop/evaluation/loud/LeptonData1479745019718.lep";
+            path = "/home/macsz/Projects/evaluation/glasses/glasses-1.lep";
         }
         
 //        Main previewWindow = new Main(ea);
