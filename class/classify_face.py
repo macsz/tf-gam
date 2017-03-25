@@ -5,7 +5,7 @@ from PIL import Image
 import scipy.misc
 import numpy as np
 from timeit import default_timer as timer
-from tools import get_color_intensity, get_cached_prob, get_column_power, get_avg_color, array_slice
+import tools
 
 THRESHOLD_DOWN = 0.5
 THRESHOLD_UP = 0.8
@@ -19,33 +19,36 @@ class ClassifyFace:
     noses = {}
 
     def get_weights(self, shape, ):
-        tf.get_variable('weights', shape, initializer=tf.zeros_initializer)
-        return tf.get_variable('weights', shape, initializer=tf.zeros_initializer)
+        return tf.get_variable('weights', shape,
+                               initializer=tf.zeros_initializer)
 
     def get_biases(self, shape):
-        return tf.get_variable('biases', shape, initializer=tf.zeros_initializer)
+        return tf.get_variable('biases', shape,
+                               initializer=tf.zeros_initializer)
 
     def _load_tf(self):
         # Loads label file, strips off carriage return
-        self._label_lines = [line.rstrip() for line in tf.gfile.GFile(
-            "class/models/face_retrained_labels.txt")]
+        self._label_lines = [
+            line.rstrip() for line
+            in tf.gfile.GFile("class/models/face_retrained_labels.txt")
+        ]
 
         # Unpersists graph from file
-        with tf.gfile.FastGFile(
-                        "class/models/face_retrained_graph.pb",
-                        'rb'
-        ) as f:
+        with tf.gfile.FastGFile("class/models/face_retrained_graph.pb", 'rb')\
+                as f:
             graph_def = tf.GraphDef()
             graph_def.ParseFromString(f.read())
             _ = tf.import_graph_def(graph_def, name='')
 
     def _run_tf(self, sess, image_data):
-            # Feed the image_data as input to the graph and get first prediction
+            # Feed the image_data as input to the graph and get first
+            # prediction
 
             softmax_tensor = sess.graph.get_tensor_by_name('final_result:0')
             feature_tensor = sess.graph.get_tensor_by_name('mixed_10/join:0')
             # feature_set: 1x 8x8x2048
-            feature_set = sess.run(feature_tensor, {'DecodeJpeg/contents:0': image_data})
+            feature_set = sess.run(feature_tensor,
+                                   {'DecodeJpeg/contents:0': image_data})
 
             for cells in feature_set:
                 for x in range(0, len(cells)):
@@ -80,7 +83,8 @@ class ClassifyFace:
                 time_start = timer()
                 self._run_tf(sess, image_data)
                 time_elapsed = timer() - time_start
-                print('{0}/{1}'.format(counter, len(self._files)), 'Face TF elapsed time', image_path, time_elapsed)
+                print('{0}/{1}'.format(counter, len(self._files)),
+                      'Face TF elapsed time', image_path, time_elapsed)
 
                 img_full = np.array(Image.open(image_path), dtype=np.uint8)
 
@@ -123,7 +127,8 @@ class ClassifyFace:
                     for r in range(0, 8):
                         prob = self._mat[str(r) + ',' + str(h)]
                         if prob > THRESHOLD_DOWN:
-                            cached_prob, activity = get_cached_prob(cache=cache, h=h, r=r)
+                            cached_prob, activity = tools.get_cached_prob(
+                                cache=cache, h=h, r=r)
                             if cached_prob:
                                 frame_mask[h][r] = 1
                 max_h = -1
@@ -133,7 +138,7 @@ class ClassifyFace:
                 cells_avg_color = []
 
                 for h in range(0, 8):
-                    if get_column_power(frame_mask, h) > 1:
+                    if tools.get_column_power(frame_mask, h) > 1:
                         for r in range(0, 8):
                             prob = self._mat[str(r) + ',' + str(h)]
                             if prob > THRESHOLD_DOWN:
@@ -145,21 +150,36 @@ class ClassifyFace:
                                     max_h = h
                                 if r > max_r:
                                     max_r = r
-                                tile = patches.Rectangle((80 / 8 * h, 60 / 8 * r), 80 / 8, 60 / 8, linewidth=1,
-                                                         edgecolor='g', facecolor='g',
-                                                         alpha=get_color_intensity(prob, norm=False))
-                                cells_avg_color.append(get_avg_color(array_slice(img_full, x=int(80 / 8 * h),
-                                                                                 y=int(60 / 8 * r), w=int(80 / 8),
-                                                                                 h=int(60 / 8))))
+                                tile = patches.Rectangle(
+                                    (80/8*h, 60/8*r),
+                                    80/8, 60/8,
+                                    linewidth=1, edgecolor='g', facecolor='g',
+                                    alpha=tools.get_color_intensity(prob,
+                                                                    norm=False)
+                                )
+                                cells_avg_color.append(tools.get_avg_color(
+                                    tools.array_slice(img_full,
+                                                      x=int(80/8*h),
+                                                      y=int(60/8*r),
+                                                      w=int(80/8),
+                                                      h=int(60 / 8)
+                                                      )
+                                ))
                                 ax.add_patch(tile)
                 frame_active_avg = np.average(cells_avg_color)
-                print('Frame\'s average color for active cells:', frame_active_avg)
+                print('Frame\'s average color for active cells:',
+                      frame_active_avg)
                 all_frames_cells_avg_color_sum += frame_active_avg
 
-                detected_face = patches.Rectangle((80 / 8 * min_h, 60 / 8 * min_r), 80 / 8 * (max_h-min_h+1),
-                                                  60 / 8 * (max_r-min_r+1), linewidth=3, edgecolor='g', facecolor='none')
+                detected_face = patches.Rectangle(
+                    (80/8*min_h, 60/8*min_r),
+                    80/8*(max_h-min_h+1),
+                    60/8*(max_r-min_r+1),
+                    linewidth=3, edgecolor='g', facecolor='none')
                 ax.add_patch(detected_face)
-                img_face = img_full[min_r*int(60 / 8):(max_r+1)*int(60 / 8), min_h*int(80 / 8):(max_h+1)*int(80 / 8)]
+                img_face = img_full[
+                           min_r*int(60/8):(max_r+1)*int(60/8),
+                           min_h*int(80/8):(max_h+1)*int(80/8)]
                 save_path = image_path.split('/')
                 save_path[-2] = 'output_face'
                 save_path = '/'.join(save_path)
@@ -190,7 +210,8 @@ class ClassifyFace:
                 plt.clf()
                 plt.cla()
                 plt.close('all')
-        print('Movie\'s average color for active cells:', (all_frames_cells_avg_color_sum/len(self._files)))
+        print('Movie\'s average color for active cells:',
+              (all_frames_cells_avg_color_sum/len(self._files)))
         print('Total failed:', failed_counter)
 
     def __init__(self, files):

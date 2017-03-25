@@ -97,7 +97,7 @@ nbactions.xml
 
 # outputs
 *.mp4
-out/
+output/
 
 # OSX
 .DS_Store

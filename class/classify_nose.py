@@ -19,16 +19,19 @@ class ClassifyNose:
     _sorted_probs = None
 
     def get_weights(self, shape, ):
-        tf.get_variable('weights', shape, initializer=tf.zeros_initializer)
-        return tf.get_variable('weights', shape, initializer=tf.zeros_initializer)
+        return tf.get_variable('weights', shape,
+                               initializer=tf.zeros_initializer)
 
     def get_biases(self, shape):
-        return tf.get_variable('biases', shape, initializer=tf.zeros_initializer)
+        return tf.get_variable('biases', shape,
+                               initializer=tf.zeros_initializer)
 
     def _load_tf(self):
         # Loads label file, strips off carriage return
-        self._label_lines = [line.rstrip() for line in tf.gfile.GFile(
-            "class/models/nose_retrained_labels.txt")]
+        self._label_lines = [
+            line.rstrip() for line
+            in tf.gfile.GFile("class/models/nose_retrained_labels.txt")
+        ]
 
         # Unpersists graph from file
         with tf.gfile.FastGFile(
@@ -45,7 +48,8 @@ class ClassifyNose:
         softmax_tensor = sess.graph.get_tensor_by_name('final_result:0')
         feature_tensor = sess.graph.get_tensor_by_name('mixed_10/join:0')
         # feature_set: 1x 8x8x2048
-        feature_set = sess.run(feature_tensor, {'DecodeJpeg/contents:0': image_data})
+        feature_set = sess.run(feature_tensor,
+                               {'DecodeJpeg/contents:0': image_data})
 
         for cells in feature_set:
             for x in range(0, len(cells)):
@@ -61,7 +65,8 @@ class ClassifyNose:
                         score = probabilities[node_id]
                         if human_string != 'other':
                             self._mat[str(x) + ',' + str(y)] = score
-        self._sorted_probs = sorted(self._mat.items(), key=operator.itemgetter(1))
+        self._sorted_probs = sorted(self._mat.items(),
+                                    key=operator.itemgetter(1))
 
     def run(self):
         self._load_tf()
@@ -72,17 +77,23 @@ class ClassifyNose:
             for image_path in sorted(self._noses.keys()):
                 counter += 1
                 try:
-                    image_data = tf.gfile.FastGFile(self._noses[image_path]['nose_path'], 'rb').read()
+                    image_data = tf.gfile.FastGFile(
+                        self._noses[image_path]['nose_path'], 'rb').read()
                 except:
                     continue
 
                 time_start = timer()
                 self._run_tf(sess, image_data)
                 time_elapsed = timer() - time_start
-                print('{0}/{1}'.format(counter, len(self._noses)), 'Nose TF elapsed time', image_path, time_elapsed)
+                print('{0}/{1}'.format(counter, len(self._noses)),
+                      'Nose TF elapsed time', image_path, time_elapsed)
 
-                img_full_for_nose = np.array(Image.open(self._noses[image_path]['nose_path']), dtype=np.uint8)
-                img_full = np.array(Image.open(self._noses[image_path]['orig_path']), dtype=np.uint8)
+                img_full_for_nose = np.array(
+                    Image.open(self._noses[image_path]['nose_path']),
+                    dtype=np.uint8)
+                img_full = np.array(
+                    Image.open(self._noses[image_path]['orig_path']),
+                    dtype=np.uint8)
                 lh, lr = len(img_full_for_nose[0]), len(img_full_for_nose)
 
                 # Create figure and axes
@@ -160,8 +171,9 @@ class ClassifyNose:
                     alpha=0.5)
                 ax.add_patch(tile)
 
-                detected_nose = patches.Rectangle((min_h, min_r), (max_h - min_h), (max_r - min_r), linewidth=2,
-                                                  edgecolor='b', facecolor='none', alpha=0.5)
+                detected_nose = patches.Rectangle(
+                    (min_h, min_r), (max_h-min_h), (max_r-min_r),
+                    linewidth=2, edgecolor='b', facecolor='none', alpha=0.5)
                 ax.add_patch(detected_nose)
 
                 save_path = image_path.split('/')
