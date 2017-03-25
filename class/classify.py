@@ -24,7 +24,7 @@ if __name__ == '__main__':
     # co 10ty plik
     # files = files[0::10]
     # n pierwszych
-    # files = files[:20]
+    files = files[:20]
 
     tools.draw_grid(img=None, open_path=files[0],
                     save_path=join(ROOT_PATH, 'grid.jpg'),

@@ -77,12 +77,18 @@ def draw_grid(img, save_path='playground/saved.jpg',
             )
             ax.add_patch(tile)
 
-            if face_coords_static:
+            if face_coords_static and face_coords_static['x1'] <= x <= \
+                    face_coords_static['x2'] and face_coords_static['y1'] <=\
+                    y <= face_coords_static['y2']:
+                tile = patches.Rectangle((xp * x, yp * y), xp, yp, linewidth=1,
+                                         edgecolor='g', facecolor='g',
+                                         alpha=0.5)
+                ax.add_patch(tile)
                 cells_avg_color.append(
                     get_avg_color(
                         array_slice(img,
-                                    x=int(xp * x), w=int(80 / 8),
-                                    y=int(yp * y), h=int(60 / 8)
+                                    x=int(xp * x), w=int(xp),
+                                    y=int(yp * y), h=int(yp)
                                     )
                     )
                 )
@@ -107,4 +113,4 @@ def convert_coords(coords_str):
     p2 = coords_str.split('x')[1]
     x2 = p2.split(':')[0]
     y2 = p2.split(':')[1]
-    return {'x1': x1, 'y1': y1, 'x2': x2, 'y2': y2}
+    return {'x1': int(x1), 'y1': int(y1), 'x2': int(x2), 'y2': int(y2)}
