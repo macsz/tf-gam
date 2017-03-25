@@ -72,6 +72,9 @@ class ClassifyFace:
         cache = []
         failed_counter = 0
         all_frames_cells_avg_color_sum = 0
+        xp = 80 / 8
+        yp = 60 / 8
+        face_coords_static = self._params['face_coords_static']
         with tf.Session() as sess:
 
             for image_path in sorted(self._files):
@@ -115,57 +118,71 @@ class ClassifyFace:
                     [0, 0, 0, 0, 0, 0, 0, 0],
                 ]
 
-                for h in range(0, 8):
-                    for r in range(0, 8):
-                        prob = self._mat[str(r) + ',' + str(h)]
+                for x in range(0, 8):
+                    for y in range(0, 8):
+                        prob = self._mat[str(y) + ',' + str(x)]
                         if prob > THRESHOLD_DOWN:
-                            frame_cache[h][r] += 1
+                            frame_cache[x][y] += 1
 
                 cache.append(frame_cache)
 
-                for h in range(0, 8):
-                    for r in range(0, 8):
-                        prob = self._mat[str(r) + ',' + str(h)]
+                for x in range(0, 8):
+                    for y in range(0, 8):
+                        prob = self._mat[str(y) + ',' + str(x)]
                         if prob > THRESHOLD_DOWN:
                             cached_prob, activity = tools.get_cached_prob(
-                                cache=cache, h=h, r=r)
+                                cache=cache, h=x, r=y)
                             if cached_prob:
-                                frame_mask[h][r] = 1
+                                frame_mask[x][y] = 1
                 max_h = -1
                 max_r = -1
                 min_h = 999
                 min_r = 999
                 cells_avg_color = []
+                static_active_overlay_count = 0
+                active_cells_count = 0
 
-                for h in range(0, 8):
-                    if tools.get_column_power(frame_mask, h) > 1:
-                        for r in range(0, 8):
-                            prob = self._mat[str(r) + ',' + str(h)]
+                for x in range(0, 8):
+                    if tools.get_column_power(frame_mask, x) > 1:
+                        for y in range(0, 8):
+                            prob = self._mat[str(y) + ',' + str(x)]
                             if prob > THRESHOLD_DOWN:
-                                if h < min_h:
-                                    min_h = h
-                                if r < min_r:
-                                    min_r = r
-                                if h > max_h:
-                                    max_h = h
-                                if r > max_r:
-                                    max_r = r
+                                if x < min_h:
+                                    min_h = x
+                                if y < min_r:
+                                    min_r = y
+                                if x > max_h:
+                                    max_h = x
+                                if y > max_r:
+                                    max_r = y
                                 tile = patches.Rectangle(
-                                    (80/8*h, 60/8*r),
-                                    80/8, 60/8,
+                                    (xp*x, yp*y),
+                                    xp, yp,
                                     linewidth=1, edgecolor='g', facecolor='g',
                                     alpha=tools.get_color_intensity(prob,
                                                                     norm=False)
                                 )
+                                ax.add_patch(tile)
+
                                 cells_avg_color.append(tools.get_avg_color(
                                     tools.array_slice(img_full,
-                                                      x=int(80/8*h),
-                                                      y=int(60/8*r),
-                                                      w=int(80/8),
-                                                      h=int(60/8)
+                                                      x=int(xp*x),
+                                                      y=int(yp*y),
+                                                      w=int(xp),
+                                                      h=int(yp)
                                                       )
                                 ))
-                                ax.add_patch(tile)
+
+                                active_cells_count += 1
+                                if face_coords_static['x1'] <= x <= \
+                                        face_coords_static['x2'] and \
+                                        face_coords_static['y1'] <= y <= \
+                                                face_coords_static['y2']:
+                                    static_active_overlay_count += 1
+                print('Frame\'s active cells count:',
+                      active_cells_count)
+                print('Frame\'s cells overlaying with static count:',
+                      static_active_overlay_count)
                 frame_active_avg = np.average(cells_avg_color)
                 print('Frame\'s average color for active cells:',
                       frame_active_avg)

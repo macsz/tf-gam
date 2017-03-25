@@ -19,6 +19,12 @@ if __name__ == '__main__':
         'face_coords_static': tools.convert_coords(args.face_coords_static),
     }
 
+    print('Static frame\'s cells count:',
+          (params['face_coords_static']['x2']-params['face_coords_static'][
+              'x1'] + 1) *
+          (params['face_coords_static']['y2']-params['face_coords_static'][
+              'y1'] + 1))
+
     files = sorted([join(FRAMES_PATH, f) for f in listdir(FRAMES_PATH)
                     if isfile(join(FRAMES_PATH, f))])
     # co 10ty plik

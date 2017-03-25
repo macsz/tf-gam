@@ -68,6 +68,8 @@ def draw_grid(img, save_path='playground/saved.jpg',
         for y in range(8):
             tile = patches.Rectangle((xp * x, yp * y), xp, yp, linewidth=1,
                                      edgecolor='g', facecolor='none')
+            ax.add_patch(tile)
+
             text_x = xp * x + xp / 3
             text_y = yp * y + yp / 2
             ax.annotate(
@@ -75,7 +77,6 @@ def draw_grid(img, save_path='playground/saved.jpg',
                 xytext=(text_x, text_y),
                 xy=(text_x, text_y), color='red'
             )
-            ax.add_patch(tile)
 
             if face_coords_static and face_coords_static['x1'] <= x <= \
                     face_coords_static['x2'] and face_coords_static['y1'] <=\
