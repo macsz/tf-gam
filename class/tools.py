@@ -54,13 +54,16 @@ def array_slice(arr, x, y, w, h):
     return arr[y:y+h, x:x+w]
 
 
-def draw_grid(img, save_path='playground/saved.jpg', open_path='playground/image.jpg'):
+def draw_grid(img, save_path='playground/saved.jpg',
+              open_path='playground/image.jpg',
+              face_coords_static=None):
     plt.close('all')
     if not img:
         img = np.array(Image.open(open_path), dtype=np.uint8)
     fig, ax = plt.subplots()
     xp = float(80 / 8)
     yp = float(60 / 8)
+    cells_avg_color = []
     for x in range(8):
         for y in range(8):
             tile = patches.Rectangle((xp * x, yp * y), xp, yp, linewidth=1,
@@ -74,7 +77,34 @@ def draw_grid(img, save_path='playground/saved.jpg', open_path='playground/image
             )
             ax.add_patch(tile)
 
+            if face_coords_static:
+                cells_avg_color.append(
+                    get_avg_color(
+                        array_slice(img,
+                                    x=int(xp * x), w=int(80 / 8),
+                                    y=int(yp * y), h=int(60 / 8)
+                                    )
+                    )
+                )
+    frame_active_avg = np.average(cells_avg_color)
+    print('Static frame\'s average color for active cells:',
+          frame_active_avg)
     ax.imshow(img)
     plt.axis("off")
     # plt.show()
     plt.savefig(save_path)
+
+
+def convert_coords(coords_str):
+    """
+    Converts string coordinates into the tuple of ints
+    :param coords_str: X1:Y1xX2:Y2
+    :return: {x1, y1, x2, y2}
+    """
+    p1 = coords_str.split('x')[0]
+    x1 = p1.split(':')[0]
+    y1 = p1.split(':')[1]
+    p2 = coords_str.split('x')[1]
+    x2 = p2.split(':')[0]
+    y2 = p2.split(':')[1]
+    return {'x1': x1, 'y1': y1, 'x2': x2, 'y2': y2}

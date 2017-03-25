@@ -7,11 +7,18 @@ function log {
     echo "[`date`] $1" | tee -a log.txt
 }
 
+function get_face_coords_static {
+    VAR=$1
+    DIR=${VAR%/*}
+    C=`echo "${VAR##*/}" | cut -d'.' -f1`
+    cat "${DIR}/$C-coord.txt"
+}
 #####
 PROC="cpu"
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 BASE_NAME=`basename $1 | cut -d'.' -f1`
 OUTPUT_DIR=$DIR/output/$BASE_NAME/`date '+%F-%H-%M'`
+FACE_COORDS_STATIC=`get_face_coords_static $1`
 
 # JAVA #
 JAVA_BIN="/usr/lib/jvm/java-8-oracle/bin/java"
@@ -44,7 +51,8 @@ cd /home/macsz/Projects/tf-gam/desktop; JAVA_HOME=/usr/lib/jvm/java-8-oracle
 popd
 
 START=$(date +%s.%N)
-python class/classify.py | tee -a log.txt
+python class/classify.py \
+    --face-coords-static $FACE_COORDS_STATIC | tee -a log.txt
 END=$(date +%s.%N)
 DIFF=$(echo "$END - $START" | bc)
 log "Python code took $DIFF seconds to execute"

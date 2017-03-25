@@ -162,7 +162,7 @@ class ClassifyFace:
                                                       x=int(80/8*h),
                                                       y=int(60/8*r),
                                                       w=int(80/8),
-                                                      h=int(60 / 8)
+                                                      h=int(60/8)
                                                       )
                                 ))
                                 ax.add_patch(tile)
@@ -214,5 +214,6 @@ class ClassifyFace:
               (all_frames_cells_avg_color_sum/len(self._files)))
         print('Total failed:', failed_counter)
 
-    def __init__(self, files):
+    def __init__(self, files, params):
         self._files = files
+        self._params = params
