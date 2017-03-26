@@ -179,6 +179,23 @@ class ClassifyFace:
                                         face_coords_static['y1'] <= y <= \
                                                 face_coords_static['y2']:
                                     static_active_overlay_count += 1
+                            else:
+                                # draw red rectangles for non-active areas #1/2
+                                tile = patches.Rectangle(
+                                    (xp * x, yp * y),
+                                    xp, yp,
+                                    linewidth=1, edgecolor='r',
+                                    facecolor='none', alpha=0.5)
+                                ax.add_patch(tile)
+                    else:
+                        # draw red rectangles for non-active areas #2/2
+                        for y in range(0, 8):
+                            tile = patches.Rectangle(
+                                (xp * x, yp * y),
+                                xp, yp,
+                                linewidth=1, edgecolor='r', facecolor='none',
+                                alpha=0.5)
+                            ax.add_patch(tile)
                 print('Frame\'s active cells count:',
                       active_cells_count)
                 print('Frame\'s cells overlaying with static count:',
