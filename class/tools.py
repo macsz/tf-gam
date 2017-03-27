@@ -14,14 +14,14 @@ def get_color_intensity(prob, norm=False, threshold_down=0.5, threshold_up=0.8):
     return val
 
 
-def get_cached_prob(cache, h, r, active_frames=7, threshold=3):
+def get_cached_prob(cache, x, y, active_frames=7, threshold=3):
     """
 
     :param threshold:
     :param active_frames:
     :param cache: list of image caches
-    :param h:
-    :param r:
+    :param x:
+    :param y:
     :return:
     """
     if not cache:
@@ -33,7 +33,7 @@ def get_cached_prob(cache, h, r, active_frames=7, threshold=3):
         return True, 0
         # start_frame = 0
     for i in range(start_frame, last_frame):
-        if cache[i][h][r]:
+        if cache[i][x][y]:
             activity += 1
     cached_prob = activity >= threshold
     return cached_prob, activity

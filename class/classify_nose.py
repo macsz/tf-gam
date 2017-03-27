@@ -94,7 +94,7 @@ class ClassifyNose:
                 img_full = np.array(
                     Image.open(self._noses[image_path]['orig_path']),
                     dtype=np.uint8)
-                lh, lr = len(img_full_for_nose[0]), len(img_full_for_nose)
+                lx, ly = len(img_full_for_nose[0]), len(img_full_for_nose)
 
                 # Create figure and axes
                 fig, ax = plt.subplots(1)
@@ -114,45 +114,47 @@ class ClassifyNose:
                 ]
 
                 for h in range(0, 8):
-                    for r in range(0, 8):
-                        prob = self._mat[str(r) + ',' + str(h)]
+                    for y in range(0, 8):
+                        prob = self._mat[str(y) + ',' + str(h)]
                         if prob > THRESHOLD_DOWN and prob in [x[1] for x in self._sorted_probs[-2:]]:
-                            frame_cache[h][r] = 1
+                            frame_cache[h][y] = 1
 
                 cache.append(frame_cache)
 
-                max_h = -1
-                max_r = -1
-                min_h = 999
-                min_r = 999
+                max_x = -1
+                max_y = -1
+                min_x = 999
+                min_y = 999
 
-                for h in range(0, 8):
-                    for r in range(0, 8):
-                        prob = self._mat[str(r) + ',' + str(h)]
+                for x in range(0, 8):
+                    for y in range(0, 8):
+                        prob = self._mat[str(y) + ',' + str(x)]
                         # if prob > THRESHOLD_DOWN:
-                        cached_prob, activity = get_cached_prob(cache=cache, h=h, r=r, active_frames=10,
-                                                                threshold=4)
+                        cached_prob, activity = get_cached_prob(
+                            cache=cache, x=x, y=y, active_frames=10,
+                            threshold=4)
                         if cached_prob and activity > 0:
-                            if lh / 8 * h + self._noses[image_path]['nose_position']['min_h'] * 80 / 8 < min_h:
-                                min_h = lh / 8 * h + self._noses[image_path]['nose_position']['min_h'] * 80 / 8
-                            if lr / 8 * r + self._noses[image_path]['nose_position']['min_r'] * 60 / 8 < min_r:
-                                min_r = lr / 8 * r + self._noses[image_path]['nose_position']['min_r'] * 60 / 8
-                            if lh / 8 * h + self._noses[image_path]['nose_position']['min_h'] * 80 / 8 + lh / 8 > max_h:
-                                max_h = lh / 8 * h + self._noses[image_path]['nose_position']['min_h'] * 80 / 8 + lh / 8
-                            if lr / 8 * r + self._noses[image_path]['nose_position']['min_r'] * 60 / 8 + lr / 8 > max_r:
-                                max_r = lr / 8 * r + self._noses[image_path]['nose_position']['min_r'] * 60 / 8 + lr / 8
+                            if lx / 8 * x + self._noses[image_path]['nose_position']['min_x'] * 80 / 8 < min_x:
+                                min_x = lx / 8 * x + self._noses[image_path]['nose_position']['min_x'] * 80 / 8
+                            if ly / 8 * y + self._noses[image_path]['nose_position']['min_y'] * 60 / 8 < min_y:
+                                min_y = ly / 8 * y + self._noses[image_path]['nose_position']['min_y'] * 60 / 8
+                            if lx / 8 * x + self._noses[image_path]['nose_position']['min_x'] * 80 / 8 + lx / 8 \
+                                    > max_x:
+                                max_x = lx / 8 * x + self._noses[image_path]['nose_position']['min_x'] * 80 / 8 + lx / 8
+                            if ly / 8 * y + self._noses[image_path]['nose_position']['min_y'] * 60 / 8 + ly / 8 > max_y:
+                                max_y = ly / 8 * y + self._noses[image_path]['nose_position']['min_y'] * 60 / 8 + ly / 8
                             tile = patches.Rectangle(
-                                (lh / 8 * h + self._noses[image_path]['nose_position']['min_h'] * 80 / 8,
-                                 lr / 8 * r + self._noses[image_path]['nose_position']['min_r'] * 60 / 8),
-                                lh / 8, lr / 8, linewidth=1,
-                                edgecolor='b',
-                                facecolor='b',
+                                (lx / 8 * x + self._noses[image_path]['nose_position']['min_x'] * 80 / 8,
+                                 ly / 8 * y + self._noses[image_path]['nose_position']['min_y'] * 60 / 8),
+                                lx / 8, ly / 8, linewidth=1,
+                                edgecolor='b', facecolor='b',
                                 alpha=get_color_intensity(prob, norm=False,
-                                                          threshold_up=THRESHOLD_UP,
-                                                          threshold_down=THRESHOLD_DOWN))
+                                    threshold_up=THRESHOLD_UP,
+                                    threshold_down=THRESHOLD_DOWN)
+                            )
                             ax.add_patch(tile)
                             # text_h = lh / 8 * h + self._noses[image_path]['nose_position']['min_h'] * 80 / 8 + lh/16
-                            # text_r = lr / 8 * r + self._noses[image_path]['nose_position']['min_r'] * 60 / 8 + lr/16
+                            # text_r = ly / 8 * y + self._noses[image_path]['nose_position']['min_y'] * 60 / 8 + ly/16
                             # ax.annotate(str(activity),
                             #     xytext=(
                             #         text_h,
@@ -164,15 +166,14 @@ class ClassifyNose:
                             #     ))
 
                 tile = patches.Rectangle(
-                    (self._noses[image_path]['nose_position']['min_h'] * 80 / 8,
-                     self._noses[image_path]['nose_position']['min_r'] * 60 / 8),
-                    lh, lr, linewidth=3, edgecolor='g',
-                    facecolor='none',
+                    (self._noses[image_path]['nose_position']['min_x'] * 80 / 8,
+                     self._noses[image_path]['nose_position']['min_y'] * 60 / 8),
+                    lx, ly, linewidth=3, edgecolor='g', facecolor='none',
                     alpha=0.5)
                 ax.add_patch(tile)
 
                 detected_nose = patches.Rectangle(
-                    (min_h, min_r), (max_h-min_h), (max_r-min_r),
+                    (min_x, min_y), (max_x-min_x), (max_y-min_y),
                     linewidth=2, edgecolor='b', facecolor='none', alpha=0.5)
                 ax.add_patch(detected_nose)
 

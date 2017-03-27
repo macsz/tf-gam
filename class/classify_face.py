@@ -131,13 +131,13 @@ class ClassifyFace:
                         prob = self._mat[str(y) + ',' + str(x)]
                         if prob > THRESHOLD_DOWN:
                             cached_prob, activity = tools.get_cached_prob(
-                                cache=cache, h=x, r=y)
+                                cache=cache, x=x, y=y)
                             if cached_prob:
                                 frame_mask[x][y] = 1
-                max_h = -1
-                max_r = -1
-                min_h = 999
-                min_r = 999
+                max_x = -1
+                max_y = -1
+                min_x = 999
+                min_y = 999
                 cells_avg_color = []
                 static_active_overlay_count = 0
                 active_cells_count = 0
@@ -147,14 +147,14 @@ class ClassifyFace:
                         for y in range(0, 8):
                             prob = self._mat[str(y) + ',' + str(x)]
                             if prob > THRESHOLD_DOWN:
-                                if x < min_h:
-                                    min_h = x
-                                if y < min_r:
-                                    min_r = y
-                                if x > max_h:
-                                    max_h = x
-                                if y > max_r:
-                                    max_r = y
+                                if x < min_x:
+                                    min_x = x
+                                if y < min_y:
+                                    min_y = y
+                                if x > max_x:
+                                    max_x = x
+                                if y > max_y:
+                                    max_y = y
                                 tile = patches.Rectangle(
                                     (xp*x, yp*y),
                                     xp, yp,
@@ -206,14 +206,14 @@ class ClassifyFace:
                 all_frames_cells_avg_color_sum += frame_active_avg
 
                 detected_face = patches.Rectangle(
-                    (80/8*min_h, 60/8*min_r),
-                    80/8*(max_h-min_h+1),
-                    60/8*(max_r-min_r+1),
+                    (80/8*min_x, 60/8*min_y),
+                    80/8*(max_x-min_x+1),
+                    60/8*(max_y-min_y+1),
                     linewidth=3, edgecolor='g', facecolor='none')
                 ax.add_patch(detected_face)
                 img_face = img_full[
-                           min_r*int(60/8):(max_r+1)*int(60/8),
-                           min_h*int(80/8):(max_h+1)*int(80/8)]
+                           min_y*int(60/8):(max_y+1)*int(60/8),
+                           min_x*int(80/8):(max_x+1)*int(80/8)]
                 save_path = image_path.split('/')
                 save_path[-2] = 'output_face'
                 save_path = '/'.join(save_path)
@@ -233,10 +233,10 @@ class ClassifyFace:
                     'save_path': save_path,
                     'nose_path': nose_path,
                     'nose_position': {
-                        'min_h': min_h,
-                        'min_r': min_r,
-                        'max_h': max_h,
-                        'max_r': max_r
+                        'min_x': min_x,
+                        'min_y': min_y,
+                        'max_x': max_x,
+                        'max_y': max_y
                     },
                     'data': img_face
                 }
