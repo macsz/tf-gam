@@ -196,12 +196,12 @@ class ClassifyFace:
                                 linewidth=1, edgecolor='r', facecolor='none',
                                 alpha=0.5)
                             ax.add_patch(tile)
-                print('Frame\'s active cells count:',
+                print('Face (frame) active cells count:',
                       active_cells_count)
-                print('Frame\'s cells overlaying with static count:',
+                print('Face (frame) cells overlaying with static count:',
                       static_active_overlay_count)
                 frame_active_avg = np.average(cells_avg_color)
-                print('Frame\'s average color for active cells:',
+                print('Face (frame) average color for active cells:',
                       frame_active_avg)
                 all_frames_cells_avg_color_sum += frame_active_avg
 
@@ -244,7 +244,7 @@ class ClassifyFace:
                 plt.clf()
                 plt.cla()
                 plt.close('all')
-        print('Movie\'s average color for active cells:',
+        print('Face (movie) average color for active cells:',
               (all_frames_cells_avg_color_sum/len(self._files)))
         print('Total failed:', failed_counter)
 

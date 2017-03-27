@@ -5,7 +5,8 @@ from PIL import Image
 import numpy as np
 import operator
 from timeit import default_timer as timer
-from tools import get_color_intensity, get_cached_prob
+from tools import get_color_intensity, get_cached_prob, get_avg_color, \
+    array_slice
 
 THRESHOLD_DOWN = 0.72
 THRESHOLD_UP = 0.75
@@ -72,6 +73,8 @@ class ClassifyNose:
         self._load_tf()
         counter = 0
         cache = []
+        all_frames_cells_avg_color_sum = 0
+        avg_successful_frames = len(self._noses.keys())
         with tf.Session() as sess:
             # For cache to work dict must be sorted
             for image_path in sorted(self._noses.keys()):
@@ -95,6 +98,8 @@ class ClassifyNose:
                     Image.open(self._noses[image_path]['orig_path']),
                     dtype=np.uint8)
                 lx, ly = len(img_full_for_nose[0]), len(img_full_for_nose)
+                xp = lx/8
+                yp = ly/8
 
                 # Create figure and axes
                 fig, ax = plt.subplots(1)
@@ -126,6 +131,8 @@ class ClassifyNose:
                 min_x = 999
                 min_y = 999
 
+                cells_avg_color = []
+
                 for x in range(0, 8):
                     for y in range(0, 8):
                         prob = self._mat[str(y) + ',' + str(x)]
@@ -134,27 +141,32 @@ class ClassifyNose:
                             cache=cache, x=x, y=y, active_frames=10,
                             threshold=4)
                         if cached_prob and activity > 0:
-                            if lx / 8 * x + self._noses[image_path]['nose_position']['min_x'] * 80 / 8 < min_x:
-                                min_x = lx / 8 * x + self._noses[image_path]['nose_position']['min_x'] * 80 / 8
-                            if ly / 8 * y + self._noses[image_path]['nose_position']['min_y'] * 60 / 8 < min_y:
-                                min_y = ly / 8 * y + self._noses[image_path]['nose_position']['min_y'] * 60 / 8
-                            if lx / 8 * x + self._noses[image_path]['nose_position']['min_x'] * 80 / 8 + lx / 8 \
+                            if xp * x + self._noses[image_path]['nose_position']['min_x'] * 80 / 8 < min_x:
+                                min_x = xp * x + self._noses[image_path]['nose_position']['min_x'] * 80 / 8
+                            if yp * y + self._noses[image_path]['nose_position']['min_y'] * 60 / 8 < min_y:
+                                min_y = yp * y + self._noses[image_path]['nose_position']['min_y'] * 60 / 8
+                            if xp * x + self._noses[image_path]['nose_position']['min_x'] * 80 / 8 + xp \
                                     > max_x:
-                                max_x = lx / 8 * x + self._noses[image_path]['nose_position']['min_x'] * 80 / 8 + lx / 8
-                            if ly / 8 * y + self._noses[image_path]['nose_position']['min_y'] * 60 / 8 + ly / 8 > max_y:
-                                max_y = ly / 8 * y + self._noses[image_path]['nose_position']['min_y'] * 60 / 8 + ly / 8
+                                max_x = xp * x + self._noses[image_path]['nose_position']['min_x'] * 80 / 8 + xp
+                            if yp * y + self._noses[image_path]['nose_position']['min_y'] * 60 / 8 + yp > max_y:
+                                max_y = yp * y + self._noses[image_path]['nose_position']['min_y'] * 60 / 8 + yp
                             tile = patches.Rectangle(
-                                (lx / 8 * x + self._noses[image_path]['nose_position']['min_x'] * 80 / 8,
-                                 ly / 8 * y + self._noses[image_path]['nose_position']['min_y'] * 60 / 8),
-                                lx / 8, ly / 8, linewidth=1,
+                                (xp * x + self._noses[image_path]['nose_position']['min_x'] * 80 / 8,
+                                 yp * y + self._noses[image_path]['nose_position']['min_y'] * 60 / 8),
+                                xp, yp, linewidth=1,
                                 edgecolor='b', facecolor='b',
                                 alpha=get_color_intensity(prob, norm=False,
                                     threshold_up=THRESHOLD_UP,
                                     threshold_down=THRESHOLD_DOWN)
                             )
                             ax.add_patch(tile)
+
+                            avg_active_color = get_avg_color(array_slice(
+                                img_full, x=int(xp * x), y=int(yp * y),
+                                w=int(xp), h=int(yp)))
+                            cells_avg_color.append(avg_active_color)
                             # text_h = lh / 8 * h + self._noses[image_path]['nose_position']['min_h'] * 80 / 8 + lh/16
-                            # text_r = ly / 8 * y + self._noses[image_path]['nose_position']['min_y'] * 60 / 8 + ly/16
+                            # text_r = yp * y + self._noses[image_path]['nose_position']['min_y'] * 60 / 8 + ly/16
                             # ax.annotate(str(activity),
                             #     xytext=(
                             #         text_h,
@@ -164,6 +176,15 @@ class ClassifyNose:
                             #         text_h,
                             #         text_r
                             #     ))
+                frame_active_avg = np.average(cells_avg_color)
+                import math
+                if not math.isnan(frame_active_avg):
+                    all_frames_cells_avg_color_sum += frame_active_avg
+                else:
+                    frame_active_avg = None
+                    avg_successful_frames -= 1
+                print('Nose (frame) average color for active cells:',
+                      frame_active_avg)
 
                 tile = patches.Rectangle(
                     (self._noses[image_path]['nose_position']['min_x'] * 80 / 8,
@@ -184,6 +205,8 @@ class ClassifyNose:
                 plt.clf()
                 plt.cla()
                 plt.close('all')
+        print('Nose (movie) average color for active cells:',
+              (all_frames_cells_avg_color_sum / avg_successful_frames))
 
     def __init__(self, noses):
         self._noses = noses

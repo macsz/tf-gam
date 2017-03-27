@@ -13,10 +13,10 @@ nose_frames = 0
 
 with open(path) as f:
     for line in f.readlines():
-        if 'Nose' in line:
+        if 'Nose TF' in line:
             nose_frames += 1
             nose_sum_time += float(line.split()[-1])
-        elif 'Face' in line:
+        elif 'Face TF' in line:
             face_frames += 1
             face_sum_time += float(line.split()[-1])
 
