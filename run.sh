@@ -57,6 +57,8 @@ END=$(date +%s.%N)
 DIFF=$(echo "$END - $START" | bc)
 log "Python code took $DIFF seconds to execute"
 
+python class/sum_time.py log.txt | tee sum_time.txt
+
 ffmpeg -f image2 -r 12 -i output_face/frame_%5d.jpg -vcodec mpeg4 -y face-`basename $1``date '+%F-%H-%M'`.mp4 2> /dev/null
 ffmpeg -f image2 -r 12 -i output_nose/frame_%5d.jpg -vcodec mpeg4 -y nose-`basename $1``date '+%F-%H-%M'`.mp4 2> /dev/null
 
@@ -70,6 +72,7 @@ mv output_nose $OUTPUT_DIR/
 mv input_nose $OUTPUT_DIR/
 mv *.mp4 $OUTPUT_DIR/
 mv log.txt $OUTPUT_DIR/
+mv sum_time.txt $OUTPUT_DIR/
 mv grid.jpg $OUTPUT_DIR/$BASE_NAME.jpg
 #####
 
