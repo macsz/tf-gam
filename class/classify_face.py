@@ -75,6 +75,7 @@ class ClassifyFace:
         xp = 80 / 8
         yp = 60 / 8
         face_coords_static = self._params['face_coords_static']
+        static_movie_cells_avg = []
         with tf.Session() as sess:
 
             for image_path in sorted(self._files):
@@ -141,10 +142,27 @@ class ClassifyFace:
                 cells_avg_color = []
                 static_active_overlay_count = 0
                 active_cells_count = 0
+                static_x1 = face_coords_static['x1']
+                static_x2 = face_coords_static['x2']
+                static_y1 = face_coords_static['y1']
+                static_y2 = face_coords_static['y2']
+                static_frame_cells_avg = []
 
                 for x in range(0, 8):
                     if tools.get_column_power(frame_mask, x) > 1:
                         for y in range(0, 8):
+                            # ## avg color for static frame
+                            if static_x1 <= x <= static_x2 and \
+                                                    static_y1 <= y <= static_y2:
+                                static_frame_cells_avg.append(
+                                    tools.get_avg_color(
+                                        tools.array_slice(img_full,
+                                                        x=int(xp * x),
+                                                        y=int(yp * y),
+                                                        w=int(xp),
+                                                        h=int(yp)
+                                                        )))
+                            # ## END avg color for static frame
                             prob = self._mat[str(y) + ',' + str(x)]
                             if prob > THRESHOLD_DOWN:
                                 if x < min_x:
@@ -170,14 +188,12 @@ class ClassifyFace:
                                                       y=int(yp*y),
                                                       w=int(xp),
                                                       h=int(yp)
-                                                      )
-                                ))
+                                                      )))
 
                                 active_cells_count += 1
-                                if face_coords_static['x1'] <= x <= \
-                                        face_coords_static['x2'] and \
-                                        face_coords_static['y1'] <= y <= \
-                                                face_coords_static['y2']:
+                                if static_x1 <= x <= \
+                                        static_x2 and \
+                                        static_y1 <= y <= static_y2:
                                     static_active_overlay_count += 1
                             else:
                                 # draw red rectangles for non-active areas #1/2
@@ -196,6 +212,10 @@ class ClassifyFace:
                                 linewidth=1, edgecolor='r', facecolor='none',
                                 alpha=0.5)
                             ax.add_patch(tile)
+                static_frame_cells_avg = np.average(static_frame_cells_avg)
+                print('Face (frame) static cells avg color:',
+                      static_frame_cells_avg)
+                static_movie_cells_avg.append(static_frame_cells_avg)
                 print('Face (frame) active cells count:',
                       active_cells_count)
                 print('Face (frame) cells overlaying with static count:',
@@ -244,6 +264,8 @@ class ClassifyFace:
                 plt.clf()
                 plt.cla()
                 plt.close('all')
+        print('Face (movie) static cells avg color:',
+              np.average(static_movie_cells_avg))
         print('Face (movie) average color for active cells:',
               (all_frames_cells_avg_color_sum/len(self._files)))
         print('Total failed:', failed_counter)
