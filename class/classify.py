@@ -38,7 +38,8 @@ if __name__ == '__main__':
 
     tools.draw_grid(img=None, open_path=files[0],
                     save_path=join(ROOT_PATH, 'grid.jpg'),
-                    face_coords_static=params['face_coords_static'])
+                    face_coords_static=params['face_coords_static'],
+                    nose_coords_static=params['nose_coords_static'])
 
     face_classifier = ClassifyFace(files=files, params=params)
     face_classifier.run()

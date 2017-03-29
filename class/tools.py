@@ -56,7 +56,7 @@ def array_slice(arr, x, y, w, h):
 
 def draw_grid(img, save_path='playground/saved.jpg',
               open_path='playground/image.jpg',
-              face_coords_static=None):
+              face_coords_static=None, nose_coords_static=None):
     plt.close('all')
     if not img:
         img = np.array(Image.open(open_path), dtype=np.uint8)
@@ -93,6 +93,20 @@ def draw_grid(img, save_path='playground/saved.jpg',
                                     )
                     )
                 )
+    if nose_coords_static:
+        x = nose_coords_static['x1']
+        y = nose_coords_static['y1']
+        w = nose_coords_static['x2'] - x
+        h = nose_coords_static['y2'] - y
+        tile = patches.Rectangle((x, y), w, h, linewidth=1,
+                                 edgecolor='b', facecolor='b',
+                                 alpha=0.5)
+        ax.add_patch(tile)
+
+        nose_img = array_slice(img, x=x, w=w, y=y, h=h)
+        nose_avg = np.average(nose_img)
+        print('Static nose frame average color for active cells:',
+              nose_avg)
     frame_active_avg = np.average(cells_avg_color)
     print('Static frame\'s average color for active cells:',
           frame_active_avg)
