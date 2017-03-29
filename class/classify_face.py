@@ -43,7 +43,7 @@ class ClassifyFace:
         self.sad_frame_sum += substract_frames(self.sad_previous_frame, frame)
 
     def get_sad(self):
-        return self.sad_frame_sum / len(self._files)
+        return self.sad_frame_sum / len(self._files) / 255.0
 
     def get_weights(self, shape):
         return tf.get_variable('weights', shape,
