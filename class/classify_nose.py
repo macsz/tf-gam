@@ -208,5 +208,6 @@ class ClassifyNose:
         print('Nose (movie) average color for active cells:',
               (all_frames_cells_avg_color_sum / avg_successful_frames))
 
-    def __init__(self, noses):
+    def __init__(self, noses, params):
         self._noses = noses
+        self._params = params

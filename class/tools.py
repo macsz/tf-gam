@@ -108,10 +108,10 @@ def convert_coords(coords_str):
     :param coords_str: X1:Y1xX2:Y2
     :return: {x1, y1, x2, y2}
     """
-    p1 = coords_str.split('x')[0]
+    p1 = coords_str.split('x')[-2]
     x1 = p1.split(':')[0]
     y1 = p1.split(':')[1]
-    p2 = coords_str.split('x')[1]
+    p2 = coords_str.split('x')[-1]
     x2 = p2.split(':')[0]
     y2 = p2.split(':')[1]
     return {'x1': int(x1), 'y1': int(y1), 'x2': int(x2), 'y2': int(y2)}

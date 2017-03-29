@@ -13,12 +13,21 @@ function get_face_coords_static {
     C=`echo "${VAR##*/}" | cut -d'.' -f1`
     cat "${DIR}/$C-coord.txt"
 }
+
+function get_nose_coords_static {
+    VAR=$1
+    DIR=${VAR%/*}
+    C=`echo "${VAR##*/}" | cut -d'.' -f1`
+    cat "${DIR}/$C-nose.txt"
+}
+
 #####
 PROC="cpu"
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 BASE_NAME=`basename $1 | cut -d'.' -f1`
 OUTPUT_DIR=$DIR/output/$BASE_NAME/`date '+%F-%H-%M'`
 FACE_COORDS_STATIC=`get_face_coords_static $1`
+NOSE_COORDS_STATIC=`get_nose_coords_static $1`
 
 # JAVA #
 JAVA_BIN="/usr/lib/jvm/java-8-oracle/bin/java"
@@ -52,7 +61,8 @@ popd
 
 START=$(date +%s.%N)
 python class/classify.py \
-    --face-coords-static $FACE_COORDS_STATIC | tee -a log.txt
+    --face-coords-static $FACE_COORDS_STATIC \
+    --nose-coords-static $NOSE_COORDS_STATIC | tee -a log.txt
 END=$(date +%s.%N)
 DIFF=$(echo "$END - $START" | bc)
 log "Python code took $DIFF seconds to execute"

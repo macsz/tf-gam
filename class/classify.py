@@ -13,10 +13,14 @@ if __name__ == '__main__':
     parser.add_argument("--face-coords-static", type=str, default='0:0x7:7',
                         help="String with face's static frame coordinates "
                              "in a format X1:Y1xX2:Y2")
+    parser.add_argument("--nose-coords-static", type=str, default='0:0x80:60',
+                        help="String with nose's static frame coordinates "
+                             "in a format X1:Y1xX2:Y2")
     args = parser.parse_args()
 
     params = {
         'face_coords_static': tools.convert_coords(args.face_coords_static),
+        'nose_coords_static': tools.convert_coords(args.nose_coords_static)
     }
 
     print('Static frame\'s cells count:',
@@ -41,5 +45,5 @@ if __name__ == '__main__':
 
     noses = face_classifier.noses
 
-    nose_classifier = ClassifyNose(noses=noses)
+    nose_classifier = ClassifyNose(noses=noses, params=params)
     nose_classifier.run()
