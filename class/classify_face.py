@@ -18,7 +18,63 @@ class ClassifyFace:
     _label_lines = None
     noses = {}
 
-    def get_weights(self, shape, ):
+    # SAD
+    sad_frame_sum = 0.0
+    sad_previous_frame = np.array([])
+    # SAD END
+
+    def sad(self, frame):
+        """
+        public static double getMovementCoef(ArrayList<BufferedImage> movie){
+            double frameSum = 0.0;
+            for(int frameId=1; frameId<movie.size(); frameId++){
+                BufferedImage frame1 = movie.get(frameId-1);
+                BufferedImage frame2 = movie.get(frameId);
+                frameSum += substractFrames(frame1, frame2);
+            }
+            return frameSum / movie.size();
+        }
+        
+        private static double substractFrames(BufferedImage frame1, BufferedImage frame2){
+            double pixelSum = 0.0;
+            int pixel1, pixel2, pixel1Red, pixel2Red;
+            for(int x=0; x<frame1.getWidth(); x++){
+                for(int y=0; y<frame1.getHeight(); y++){
+                    pixel1 = frame1.getRGB(x, y);
+                    pixel2 = frame2.getRGB(x, y);
+                    pixel1Red = (pixel1 >> 16) & 0x000000FF;
+                    pixel2Red = (pixel2 >> 16) & 0x000000FF;
+    
+                    pixelSum += Math.abs(pixel2Red - pixel1Red);
+                }
+            }
+            return pixelSum / frame1.getWidth() / frame1.getHeight();
+        }
+        :param frame:
+        :return: 
+        """
+        def substract_frames(frame1, frame2):
+            pixel_sum = 0
+            x_range = len(frame1)
+            y_range = len(frame1[0])
+            for x in range(x_range):
+                for y in range(y_range):
+                    c1 = frame1[x][y][0]
+                    c2 = frame2[x][y][0]
+                    import math
+                    pixel_sum += math.fabs(c1-c2)
+            return pixel_sum / x_range / y_range
+
+        if not self.sad_previous_frame.any():
+            self.sad_previous_frame = frame
+            return
+
+        self.sad_frame_sum += substract_frames(self.sad_previous_frame, frame)
+
+    def get_sad(self):
+        return self.sad_frame_sum / len(self._files)
+
+    def get_weights(self, shape):
         return tf.get_variable('weights', shape,
                                initializer=tf.zeros_initializer)
 
@@ -91,6 +147,9 @@ class ClassifyFace:
                       'Face TF elapsed time', image_path, time_elapsed)
 
                 img_full = np.array(Image.open(image_path), dtype=np.uint8)
+
+                # count SAD
+                self.sad(img_full)
 
                 # Create figure and axes
                 fig, ax = plt.subplots(1)
@@ -268,6 +327,7 @@ class ClassifyFace:
               np.average(static_movie_cells_avg))
         print('Face (movie) average color for active cells:',
               (all_frames_cells_avg_color_sum/len(self._files)))
+        print('Face (movie) SAD value:', self.get_sad())
         print('Total failed:', failed_counter)
 
     def __init__(self, files, params):
