@@ -19,12 +19,13 @@ with open(path) as f:
         line = line.rstrip()
         if 'Static frame\'s average color for active cells' in line:
             static_avg = float(line.split(' ')[-1])
-            print(static_avg)
+            static_avg /= 255
         elif 'Face (frame) average color for active cells' in line:
             frame_avg_active = float(line.split(' ')[-1])
             if math.isnan(frame_avg_active):
                 continue
 
+            frame_avg_active /= 255
             sqr_active = math.pow(static_avg - frame_avg_active, 2)
             sqrs_sum_active += sqr_active
             frames_active += 1
@@ -34,6 +35,7 @@ with open(path) as f:
             if math.isnan(frame_avg_static):
                 continue
 
+            frame_avg_static /= 255
             sqr_static = math.pow(static_avg - frame_avg_static, 2)
             sqrs_sum_static += sqr_static
             frames_static += 1
