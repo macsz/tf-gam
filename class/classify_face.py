@@ -24,35 +24,6 @@ class ClassifyFace:
     # SAD END
 
     def sad(self, frame):
-        """
-        public static double getMovementCoef(ArrayList<BufferedImage> movie){
-            double frameSum = 0.0;
-            for(int frameId=1; frameId<movie.size(); frameId++){
-                BufferedImage frame1 = movie.get(frameId-1);
-                BufferedImage frame2 = movie.get(frameId);
-                frameSum += substractFrames(frame1, frame2);
-            }
-            return frameSum / movie.size();
-        }
-        
-        private static double substractFrames(BufferedImage frame1, BufferedImage frame2){
-            double pixelSum = 0.0;
-            int pixel1, pixel2, pixel1Red, pixel2Red;
-            for(int x=0; x<frame1.getWidth(); x++){
-                for(int y=0; y<frame1.getHeight(); y++){
-                    pixel1 = frame1.getRGB(x, y);
-                    pixel2 = frame2.getRGB(x, y);
-                    pixel1Red = (pixel1 >> 16) & 0x000000FF;
-                    pixel2Red = (pixel2 >> 16) & 0x000000FF;
-    
-                    pixelSum += Math.abs(pixel2Red - pixel1Red);
-                }
-            }
-            return pixelSum / frame1.getWidth() / frame1.getHeight();
-        }
-        :param frame:
-        :return: 
-        """
         def substract_frames(frame1, frame2):
             pixel_sum = 0
             x_range = len(frame1)
