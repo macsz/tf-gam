@@ -69,6 +69,16 @@ class ClassifyNose:
         self._sorted_probs = sorted(self._mat.items(),
                                     key=operator.itemgetter(1))
 
+    def _static_cells_avg_color(self, img):
+        x = self._params['nose_coords_static']['x1']
+        y = self._params['nose_coords_static']['y1']
+        w = self._params['nose_coords_static']['x2'] - x
+        h = self._params['nose_coords_static']['y2'] - y
+
+        static_nose_avg = np.average(array_slice(img, x=x, w=w,
+                                                 y=y, h=h))
+        return static_nose_avg
+
     def run(self):
         self._load_tf()
         counter = 0
@@ -97,6 +107,10 @@ class ClassifyNose:
                 img_full = np.array(
                     Image.open(self._noses[image_path]['orig_path']),
                     dtype=np.uint8)
+
+                print('Nose (frame) static cells avg color:',
+                      self._static_cells_avg_color(img_full))
+
                 lx, ly = len(img_full_for_nose[0]), len(img_full_for_nose)
                 xp = lx/8
                 yp = ly/8
@@ -162,8 +176,8 @@ class ClassifyNose:
                             ax.add_patch(tile)
 
                             avg_active_color = get_avg_color(array_slice(
-                                img_full, x=int(xp * x), y=int(yp * y),
-                                w=int(xp), h=int(yp)))
+                                img_full_for_nose, x=int(xp * x),
+                                y=int(yp * y), w=int(xp), h=int(yp)))
                             cells_avg_color.append(avg_active_color)
                             # text_h = lh / 8 * h + self._noses[image_path]['nose_position']['min_h'] * 80 / 8 + lh/16
                             # text_r = yp * y + self._noses[image_path]['nose_position']['min_y'] * 60 / 8 + ly/16
